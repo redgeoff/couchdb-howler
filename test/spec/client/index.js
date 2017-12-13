@@ -1,8 +1,6 @@
 import Server from '../../../src/server/server'
 import Client from '../../../src/client/client'
 
-import sporks from 'sporks'
-
 describe('client', () => {
   let server = null
   let client = null

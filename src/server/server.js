@@ -1,12 +1,13 @@
 import socketIO from 'socket.io'
 import log from './log'
-import sporks from 'sporks'
+import Notifier from './notifier'
 
 class Server {
   constructor (opts) {
     this._port = opts.port
     this._io = socketIO()
     this._sockets = []
+    this._notifier = new Notifier()
   }
 
   _onConnection () {
@@ -32,9 +33,9 @@ class Server {
 
   _onSubscribe (socket) {
     socket.on('subscribe', (dbName, callback) => {
-      // TODO: actually subscribe
-
       this._logSocketInfo(socket, 'subscribe to dbName=' + dbName)
+
+      this._notifier.subscribe(socket, dbName)
 
       // Ack
       callback(dbName)
@@ -43,9 +44,9 @@ class Server {
 
   _onUnsubscribe (socket) {
     socket.on('unsubscribe', (dbName, callback) => {
-      // TODO: actually unsubscribe
-
       this._logSocketInfo(socket, 'unsubscribe from dbName=' + dbName)
+
+      this._notifier.unsubscribe(socket, dbName)
 
       // Ack
       callback(dbName)
