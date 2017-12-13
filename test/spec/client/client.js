@@ -1,26 +1,21 @@
-import Server from '../../../src/server/server'
 import Client from '../../../src/client/client'
 import testUtils from '../../utils'
 
 describe('client', () => {
-  let server = null
   let client = null
-  let port = 3000
-  let clientURL = 'http://localhost:' + port
 
   before(async () => {
-    server = new Server({ port: port, 'couchdb-url': testUtils.getCouchDBURL() })
-    await server.start()
+    await testUtils.createTestServer()
     await testUtils.createTestUser()
   })
 
   after(async () => {
-    await server.stop()
+    await testUtils.destroyTestServer()
     await testUtils.destroyTestUser()
   })
 
   beforeEach(() => {
-    client = new Client(clientURL)
+    client = new Client(testUtils.getServerURL())
   })
 
   afterEach(() => {

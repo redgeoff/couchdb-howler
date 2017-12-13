@@ -1,11 +1,16 @@
 import config from './config.json'
 import Slouch from 'couch-slouch'
+import Server from '../src/server/server'
 
 class Utils {
   constructor () {
     this.slouch = new Slouch(this.getCouchDBURL())
     this.username = 'test_username'
     this.password = 'secret'
+  }
+
+  getServerURL () {
+    return config.server.scheme + '://' + config.server.host + ':' + config.server.port
   }
 
   getCouchDBURL () {
@@ -20,6 +25,15 @@ class Utils {
       ':' +
       config.couchdb.port
     )
+  }
+
+  async createTestServer () {
+    this._server = new Server({ port: config.server.port, 'couchdb-url': this.getCouchDBURL() })
+    await this._server.start()
+  }
+
+  async destroyTestServer () {
+    await this._server.stop()
   }
 
   async createTestUser () {
