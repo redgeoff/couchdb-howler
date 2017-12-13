@@ -1,5 +1,6 @@
 import socketIO from 'socket.io'
 import log from './log'
+import sporks from 'sporks'
 
 class Server {
   constructor (opts) {
@@ -10,6 +11,8 @@ class Server {
 
   _onConnection () {
     this._io.on('connection', socket => {
+      this._logSocketInfo(socket, 'connection')
+
       this._sockets.push(socket)
       this._onSubscribe(socket)
       this._onUnsubscribe(socket)
@@ -17,10 +20,21 @@ class Server {
     })
   }
 
+  _logSocketInfo (socket, msg) {
+    log.info(
+      {
+        socketId: socket.id,
+        remoteAddress: socket.conn.remoteAddress
+      },
+      msg
+    )
+  }
+
   _onSubscribe (socket) {
     socket.on('subscribe', (dbName, callback) => {
-      // TODO
-      log.info('dbName=%s', dbName)
+      // TODO: actually subscribe
+
+      this._logSocketInfo(socket, 'subscribe to dbName=' + dbName)
 
       // Ack
       callback(dbName)
@@ -29,8 +43,9 @@ class Server {
 
   _onUnsubscribe (socket) {
     socket.on('unsubscribe', (dbName, callback) => {
-      // TODO
-      log.info('dbName=%s', dbName)
+      // TODO: actually unsubscribe
+
+      this._logSocketInfo(socket, 'unsubscribe from dbName=' + dbName)
 
       // Ack
       callback(dbName)
@@ -39,7 +54,7 @@ class Server {
 
   _onDisconnect (socket) {
     socket.on('disconnect', () => {
-      // Socket closed
+      this._logSocketInfo(socket, 'disconnect')
       this._sockets.splice(this._sockets.indexOf(socket), 1)
     })
   }
