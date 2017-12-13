@@ -8,32 +8,44 @@ class Server {
     this._sockets = []
   }
 
-  start () {
+  _onConnection () {
     this._io.on('connection', socket => {
       this._sockets.push(socket)
-
-      socket.on('subscribe', (dbName, callback) => {
-        // TODO
-        log.info('dbName=%s', dbName)
-
-        // Ack
-        callback(dbName)
-      })
-
-      socket.on('unsubscribe', (dbName, callback) => {
-        // TODO
-        log.info('dbName=%s', dbName)
-
-        // Ack
-        callback(dbName)
-      })
-
-      socket.on('disconnect', () => {
-        // Socket closed
-        this._sockets.splice(this._sockets.indexOf(socket), 1)
-      })
+      this._onSubscribe(socket)
+      this._onUnsubscribe(socket)
+      this._onDisconnect(socket)
     })
+  }
 
+  _onSubscribe (socket) {
+    socket.on('subscribe', (dbName, callback) => {
+      // TODO
+      log.info('dbName=%s', dbName)
+
+      // Ack
+      callback(dbName)
+    })
+  }
+
+  _onUnsubscribe (socket) {
+    socket.on('unsubscribe', (dbName, callback) => {
+      // TODO
+      log.info('dbName=%s', dbName)
+
+      // Ack
+      callback(dbName)
+    })
+  }
+
+  _onDisconnect (socket) {
+    socket.on('disconnect', () => {
+      // Socket closed
+      this._sockets.splice(this._sockets.indexOf(socket), 1)
+    })
+  }
+
+  start () {
+    this._onConnection()
     this._io.listen(this._port)
   }
 
