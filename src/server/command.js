@@ -3,19 +3,23 @@ import Server from './server'
 import log from './log'
 
 class Command {
-  constructor () {
-    this._usage()
-  }
-
-  _usage () {
-    this._argv = yargs
+  _usage (argv) {
+    this._argv = yargs(argv)
       .usage('Usage: $0 [options]')
+
       .example('$0 --port 3000')
+
       .alias('p', 'port')
       .nargs('p', 1)
       .describe('p', 'Port')
+      .default('p', 3000)
+
       .help('h')
       .alias('h', 'help')
+
+      .version('v')
+      .alias('v', 'version')
+
       .epilog('Copyright 2017').argv
   }
 
@@ -39,8 +43,9 @@ class Command {
     }
   }
 
-  async run () {
-    // await this._start()
+  async run (argv) {
+    this._usage(argv)
+    await this._start()
   }
 }
 

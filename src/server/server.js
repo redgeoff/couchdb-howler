@@ -1,9 +1,8 @@
 import io from 'socket.io'
-import utils from './utils'
 
 class Server {
   constructor (opts) {
-    this._port = utils.getOpt(opts, 'port', 3000)
+    this._port = opts.port
   }
 
   start () {
