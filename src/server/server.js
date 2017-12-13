@@ -123,6 +123,8 @@ class Server {
 
   start () {
     this._onConnection()
+
+    log.info('Listening on port', this._port)
     this._io.listen(this._port)
   }
 
