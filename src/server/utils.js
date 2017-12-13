@@ -1,7 +1,17 @@
 class Utils {
-  // getOpt (opts, name, def) {
-  //   return opts && opts[name] !== undefined ? opts[name] : def
-  // }
+  respond (callback, obj) {}
+
+  success (callback, obj) {
+    callback(obj)
+  }
+
+  failure (callback, err) {
+    callback({
+      error: true,
+      errorName: err.name,
+      errorMessage: err.message
+    })
+  }
 }
 
 module.exports = new Utils()

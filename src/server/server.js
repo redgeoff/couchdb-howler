@@ -1,6 +1,7 @@
 import socketIO from 'socket.io'
 import log from './log'
 import Notifier from './notifier'
+import utils from './utils'
 
 class Server {
   constructor (opts) {
@@ -37,8 +38,7 @@ class Server {
 
       this._notifier.subscribe(socket, dbName)
 
-      // Ack
-      callback(dbName)
+      utils.success(callback, { dbName: dbName })
     })
   }
 
@@ -48,8 +48,7 @@ class Server {
 
       this._notifier.unsubscribe(socket, dbName)
 
-      // Ack
-      callback(dbName)
+      utils.success(callback, { dbName: dbName })
     })
   }
 

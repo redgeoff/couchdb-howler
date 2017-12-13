@@ -1,5 +1,6 @@
 import events from 'events'
 import io from 'socket.io-client'
+import session from './session'
 
 // TODO: client.on('change', (dbName) => {})
 
@@ -11,7 +12,6 @@ class Client extends events.EventEmitter {
   }
 
   _connect () {
-    // console.log(this._url)
     this._socket = io(this._url)
 
     // // TMP
@@ -24,6 +24,14 @@ class Client extends events.EventEmitter {
     return new Promise(resolve => {
       this._socket.emit(eventName, args, resolve)
     })
+  }
+
+  async logIn (username, password) {
+    await this._emit('log-in', username, password)
+  }
+
+  async logOut () {
+    await this._emit('log-out')
   }
 
   async subscribe (dbName) {
