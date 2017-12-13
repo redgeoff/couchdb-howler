@@ -1,0 +1,84 @@
+{
+  "name": "couchdb-howler",
+  "version": "0.0.1",
+  "description": "Use web sockets to subscribe to CouchDB global changes",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/redgeoff/couchdb-howler"
+  },
+  "keywords": ["js", "seed"],
+  "author": "Geoffrey Cox",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/redgeoff/couchdb-howler/issues"
+  },
+  "scripts": {
+    "beautify": "prettier-eslint --write \"src/**/*.js\" \"test/**/*.js\"",
+    "lint": "eslint test src",
+    "compile": "babel src -d lib",
+    "compile-test":
+      "babel src -d cache/compiled/src && babel test -d cache/compiled/test",
+    "compile-for-assert": "babel src -d cache/compiled/src",
+    "diff-for-assert":
+      "if [ \"$(diff lib/ cache/compiled/src)\" != \"\" ]; then echo 'Error: you need to execute \"npm run compile\"'; exit 1; fi",
+    "assert-compiled": "npm run compile-for-assert && npm run diff-for-assert",
+    "node-test":
+      "npm run compile && mocha --require babel-core/register test/node.js",
+    "node-full-test":
+      "npm run compile && cross-env NODE_ENV=test nyc mocha test/node.js",
+    "browser-server":
+      "npm run compile-test && node_modules/gofur/scripts/browser/serve.js -c cache -t cache/compiled/test/browser.js",
+    "browser-test":
+      "npm run compile-test && node_modules/gofur/scripts/browser/test.js -c cache -t cache/compiled/test/browser.js",
+    "browser-test-firefox":
+      "npm run compile-test && node_modules/gofur/scripts/browser/test.js -c cache -t cache/compiled/test/browser.js -b selenium:firefox",
+    "browser-test-chrome":
+      "npm run compile-test && node_modules/gofur/scripts/browser/test.js -c cache -t cache/compiled/test/browser.js -b selenium:chrome",
+    "browser-test-phantomjs":
+      "npm run compile-test && node_modules/gofur/scripts/browser/test.js -c cache -t cache/compiled/test/browser.js -b selenium:phantomjs",
+    "browser-test-phantomjs":
+      "npm run compile-test && node_modules/gofur/scripts/browser/test.js -c cache -t cache/compiled/test/browser.js -b selenium:phantomjs",
+    "test": "npm run lint && npm run node-full-test"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.0.1",
+    "babel-plugin-istanbul": "^4.1.5",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.26.0",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^6.0.0",
+    "cross-env": "^5.1.1",
+    "eslint": "^4.8.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-node": "^5.2.0",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "gofur": "0.0.9",
+    "istanbul": "^0.4.5",
+    "mocha": "^4.0.1",
+    "nyc": "^11.3.0",
+    "prettier-eslint-cli": "^4.4.0"
+  },
+  "greenkeeper": {
+    "ignore": ["chai-as-promised"]
+  },
+  "nyc": {
+    "check-coverage": true,
+    "lines": 100,
+    "statements": 100,
+    "functions": 100,
+    "branches": 100,
+    "require": ["babel-register"],
+    "reporter": ["lcov", "text-summary"],
+    "cache": true,
+    "all": true,
+    "include": ["src/**/*.js"],
+    "report-dir": "./cache/coverage/node",
+    "sourceMap": false,
+    "instrument": false
+  }
+}

@@ -1,0 +1,3 @@
+# Compiling
+
+    $ npm run compile

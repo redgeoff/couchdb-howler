@@ -1,0 +1,26 @@
+# Doesn't actually work!
+# node:
+#  version: 8.1.4
+
+machine:
+  environment:
+    NODE_VERSION: 8.1.4
+  services:
+    - docker
+
+dependencies:
+  pre:
+    - nvm install $NODE_VERSION
+    - nvm use $NODE_VERSION && npm install -g npm
+
+  override:
+    - nvm use $NODE_VERSION && npm install
+
+test:
+  pre:
+    - nvm use $NODE_VERSION && npm run assert-compiled
+    - nvm use $NODE_VERSION && npm run lint
+
+  override:
+    - nvm use $NODE_VERSION && npm run node-full-test
+    - nvm use $NODE_VERSION && npm run browser-test-phantomjs
