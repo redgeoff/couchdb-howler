@@ -36,7 +36,8 @@
       "npm run compile-test && node_modules/gofur/scripts/browser/test.js -c cache -t cache/compiled/test/browser.js -b selenium:phantomjs",
     "browser-test-phantomjs":
       "npm run compile-test && node_modules/gofur/scripts/browser/test.js -c cache -t cache/compiled/test/browser.js -b selenium:phantomjs",
-    "test": "npm run lint && npm run node-full-test"
+    "test": "npm run lint && npm run node-full-test",
+    "reset-db": "./scripts/reset-db.js"
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
