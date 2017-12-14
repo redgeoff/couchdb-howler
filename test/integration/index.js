@@ -5,10 +5,9 @@ import testUtils from '../utils'
 import sporks from 'sporks'
 
 describe('integration', function () {
-  this.timeout(10000)
+  this.timeout(5000)
 
   let client = null
-  let delay = 3000
 
   before(async () => {
     await testUtils.createTestServer()
@@ -50,12 +49,13 @@ describe('integration', function () {
 
     await client.subscribe('test_db')
 
+    let changed = sporks.once(client, 'change')
+
     await createOrUpdateDoc('test_db')
 
-    // TODO: use waitFor instead!
-    await sporks.timeout(delay)
-
-    // TODO: make sure got changes for test_db
+    // Wait for change
+    let change = await changed
+    change[0].should.eql('test_db')
 
     await client.logOut()
   })

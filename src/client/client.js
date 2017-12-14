@@ -1,5 +1,3 @@
-// TODO: client.on('change', (dbName) => {})
-
 import events from 'events'
 import io from 'socket.io-client'
 import Session from './session'
@@ -63,6 +61,12 @@ class Client extends events.EventEmitter {
     return auth
   }
 
+  _onChange () {
+    this._socket.on('change', dbName => {
+      this.emit('change', dbName)
+    })
+  }
+
   _onDisconnect () {
     this._socket.on('disconnect', () => {
       this.emit('disconnect')
@@ -76,6 +80,7 @@ class Client extends events.EventEmitter {
     // We just connected so resubscribe
     await this._resubscribe()
 
+    this._onChange()
     this._onDisconnect()
 
     this.emit('connect')
@@ -109,7 +114,7 @@ class Client extends events.EventEmitter {
 
     await sporks.once(this._socket, 'connect')
 
-    // TODO: is there a bug in babel? Why is `return r` required here?
+    // Is there a bug in babel? Why is `return r` required here?
     let r = await this._onConnect()
     return r
   }

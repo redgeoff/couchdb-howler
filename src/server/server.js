@@ -90,7 +90,8 @@ class Server {
     socket.on('log-out', (params, callback) => {
       this._logSocketInfo(socket, 'logout, disconnecting...')
 
-      callback({})
+      let obj = {}
+      callback(obj)
 
       // Close the socket as we do not want a connection if it is not authorized. This will
       // automatically trigger the disconnect event that will remove the socket from sockets
@@ -147,6 +148,7 @@ class Server {
       // Are there any subscribers to this DB?
       if (sockets) {
         sporks.each(sockets, socket => {
+          this._logSocketInfo(socket, dbName + ' changed')
           socket.emit('change', dbName)
         })
       }
