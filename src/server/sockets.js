@@ -25,6 +25,10 @@ class Sockets {
     delete this._sockets[socket.id]
   }
 
+  get (dbName) {
+    return this._socketsByDBName[dbName]
+  }
+
   setCookie (socket, cookie) {
     this._sockets[socket.id].cookie = cookie
   }

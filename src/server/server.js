@@ -3,6 +3,7 @@ import log from './log'
 import Sockets from './sockets'
 import utils from './utils'
 import Slouch from 'couch-slouch'
+import sporks from 'sporks'
 
 class Server {
   constructor (opts) {
@@ -10,6 +11,7 @@ class Server {
     this._io = socketIO()
     this._sockets = new Sockets()
     this._slouch = new Slouch(opts['couchdb-url'])
+    this._iterator = null
   }
 
   async _logInOrVerifyLogin (socket, params) {
@@ -126,11 +128,38 @@ class Server {
     })
   }
 
+  _toDBName (change) {
+    return /:(.*)$/.exec(change.id)[1]
+  }
+
+  _listenToGlobalChanges () {
+    this._iterator = this._slouch.db.changes('_global_changes', {
+      feed: 'continuous',
+      heartbeat: true,
+      since: 'now'
+    })
+
+    this._iterator.each(async change => {
+      let dbName = this._toDBName(change)
+
+      let sockets = this._sockets.get(dbName)
+
+      // Are there any subscribers to this DB?
+      if (sockets) {
+        sporks.each(sockets, socket => {
+          socket.emit('change', dbName)
+        })
+      }
+    })
+  }
+
   start () {
     this._onConnection()
 
     log.info('Listening on port', this._port)
     this._io.listen(this._port)
+
+    this._listenToGlobalChanges()
   }
 
   stop () {
@@ -139,6 +168,10 @@ class Server {
 
     // Close each socket connection
     this._sockets.close()
+
+    if (this._iterator) {
+      this._iterator.abort()
+    }
   }
 }
 

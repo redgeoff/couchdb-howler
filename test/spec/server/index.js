@@ -1,3 +1,1 @@
-// describe('server', () => {
-//   it('should foo', () => {});
-// });
+import './sockets'
