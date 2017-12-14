@@ -1,8 +1,10 @@
+// TODO: actually need client to store list of subscribed DBs and pending DBs for reconnect
+
+// TODO: client.on('change', (dbName) => {})
+
 import events from 'events'
 import io from 'socket.io-client'
 import Session from './session'
-
-// TODO: client.on('change', (dbName) => {})
 
 class Client extends events.EventEmitter {
   constructor (url) {

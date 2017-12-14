@@ -1,3 +1,6 @@
+// TODO: how to prevent connection w/o auth? Need to close if not logIn in X seconds? Also appears
+// that can pass query params when connecting: https://socket.io/docs/client-api/#with-query-option
+
 import Client from '../../../src/client/client'
 import testUtils from '../../utils'
 
