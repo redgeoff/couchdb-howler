@@ -12,17 +12,59 @@ class Server {
     this._slouch = new Slouch(opts['couchdb-url'])
   }
 
+  async _logInOrVerifyLogin (socket, params) {
+    let response = null
+
+    if (params.cookie) {
+      // A cookie was supplied so verify that it is valid
+      response = await this._slouch.user.authenticated(params.cookie)
+    } else {
+      // Use the username and password to authenticate
+      response = await this._slouch.user.authenticate(params.username, params.password)
+    }
+
+    this._sockets.add(socket)
+
+    // Associate cookie with socket
+    this._sockets.setCookie(socket, response.cookie)
+
+    return response
+  }
+
+  _onAuthenticated (socket) {
+    this._onLogOut(socket)
+    this._onSubscribe(socket)
+    this._onUnsubscribe(socket)
+    this._onDisconnect(socket)
+  }
+
+  async _authenticate (socket) {
+    try {
+      let params = socket.handshake.query
+      var name = params.cookie ? params.cookie : params.username
+
+      this._logSocketInfo(socket, 'authentication attempt for ' + name)
+
+      let response = await this._logInOrVerifyLogin(socket, params)
+
+      this._logSocketInfo(socket, 'authentication success for ' + name)
+      console.log('response=', response)
+      socket.emit('authenticated', { cookie: response.cookie })
+
+      this._onAuthenticated(socket)
+    } catch (err) {
+      this._logSocketInfo(
+        socket,
+        'authentication failure for ' + name + ', err=' + JSON.stringify(err)
+      )
+      socket.emit('not-authenticated', err)
+    }
+  }
+
   _onConnection () {
-    this._io.on('connection', socket => {
+    this._io.on('connection', async socket => {
       this._logSocketInfo(socket, 'connection')
-
-      this._sockets.add(socket)
-
-      this._onLogIn(socket)
-      this._onLogOut(socket)
-      this._onSubscribe(socket)
-      this._onUnsubscribe(socket)
-      this._onDisconnect(socket)
+      await this._authenticate(socket)
     })
   }
 
@@ -39,42 +81,8 @@ class Server {
   _addSocketListener (opts) {
     opts.socket.on(opts.eventName, async (params, callback) => {
       await utils.respond(callback, async () => {
-        if (opts.requireAuthentication) {
-          this._sockets.throwIfNotAuthenticated(opts.socket)
-        }
         await opts.promiseFactory(opts.socket, params)
       })
-    })
-  }
-
-  async _logInOrVerifyLogin (socket, params) {
-    let response = null
-
-    if (params.cookie) {
-      // A cookie was supplied so verify that it is valid
-      response = await this._slouch.user.authenticated(params.cookie)
-    } else {
-      // Use the username and password to authenticate
-      response = await this._slouch.user.authenticate(params.username, params.password)
-    }
-
-    // Associate cookie with socket
-    this._sockets.setCookie(socket, response.cookie)
-
-    return response
-  }
-
-  _onLogIn (socket) {
-    this._addSocketListener({
-      socket: socket,
-      eventName: 'log-in',
-      promiseFactory: async (socket, params) => {
-        this._logSocketInfo(
-          socket,
-          'log-in for ' + (params.cookie ? params.cookie : params.username)
-        )
-        await this._logInOrVerifyLogin(socket, params)
-      }
     })
   }
 
@@ -84,7 +92,10 @@ class Server {
       eventName: 'log-out',
       promiseFactory: async (socket, params) => {
         this._logSocketInfo(socket, 'log-out for ' + this._sockets.getCookie(socket))
-        this._sockets.clearCookie(socket)
+
+        // Close the socket as we do not want a connection if it is not authorized. This will
+        // automatically trigger the disconnect event that will remove the socket from sockets
+        socket.destroy()
       }
     })
   }
@@ -93,10 +104,9 @@ class Server {
     this._addSocketListener({
       socket: socket,
       eventName: 'subscribe',
-      requireAuthentication: true,
-      promiseFactory: async (socket, params) => {
-        this._logSocketInfo(socket, 'subscribe to dbName=' + params.dbName)
-        this._sockets.subscribe(socket, params.dbName)
+      promiseFactory: async (socket, dbNames) => {
+        this._logSocketInfo(socket, 'subscribe to dbName=' + JSON.stringify(dbNames))
+        this._sockets.subscribe(socket, dbNames)
       }
     })
   }
@@ -105,10 +115,9 @@ class Server {
     this._addSocketListener({
       socket: socket,
       eventName: 'unsubscribe',
-      requireAuthentication: true,
-      promiseFactory: async (socket, params) => {
-        this._logSocketInfo(socket, 'unsubscribe from dbName=' + params.dbName)
-        this._sockets.unsubscribe(socket, params.dbName)
+      promiseFactory: async (socket, dbNames) => {
+        this._logSocketInfo(socket, 'unsubscribe from dbName=' + JSON.stringify(dbNames))
+        this._sockets.unsubscribe(socket, dbNames)
       }
     })
   }
@@ -132,7 +141,7 @@ class Server {
     // Stop accepting connections
     this._io.close()
 
-    // Close each socket connection
+    // Close each socket connection. TODO: need to manage this._sockets
     this._sockets.close()
   }
 }

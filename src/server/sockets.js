@@ -29,26 +29,13 @@ class Sockets {
     this._sockets[socket.id].cookie = cookie
   }
 
-  getCookie (socket) {
-    return this._sockets[socket.id].cookie
-  }
-
-  clearCookie (socket) {
-    delete this._sockets[socket.id].cookie
-  }
-
-  throwIfNotAuthenticated (socket) {
-    // Currently, we just check to see if a cookie exists. Validation of the cookie happens when the
-    // client connects/reconnects.
-    //
-    // FUTURE: We may want to introduce a more sophisticated check that requires certain roles,
-    // etc...
-    if (!this.getCookie(socket)) {
-      let err = new Error('not authenticated via cookie')
-      err.name = 'NotAuthenticatedError'
-      throw err
-    }
-  }
+  // getCookie (socket) {
+  //   return this._sockets[socket.id].cookie
+  // }
+  //
+  // clearCookie (socket) {
+  //   delete this._sockets[socket.id].cookie
+  // }
 
   _addDBToSockets (socket, dbName) {
     this._sockets[socket.id].dbNames[dbName] = true
@@ -62,9 +49,13 @@ class Sockets {
     this._socketsByDBName[dbName][socket.id] = socket
   }
 
-  subscribe (socket, dbName) {
+  _subscribeToDB (socket, dbName) {
     this._addDBToSockets(socket, dbName)
     this._addDBToSocketsByDBName(socket, dbName)
+  }
+
+  subscribe (socket, dbNames) {
+    dbNames.forEach(dbName => this._subscribeToDB(socket, dbName))
   }
 
   _removeDBFromSockets (socket, dbName) {
@@ -80,9 +71,13 @@ class Sockets {
     }
   }
 
-  unsubscribe (socket, dbName) {
+  _unsubscribeFromDB (socket, dbName) {
     this._removeDBFromSockets(socket, dbName)
     this._removeDBFromSocketsByDBName(socket, dbName)
+  }
+
+  unsubscribe (socket, dbNames) {
+    dbNames.forEach(dbName => this._unsubscribeFromDB(socket, dbName))
   }
 
   close () {
