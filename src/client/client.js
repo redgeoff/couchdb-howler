@@ -167,7 +167,9 @@ class Client extends events.EventEmitter {
   }
 
   stop () {
-    this._socket.disconnect()
+    if (this._socket) {
+      this._socket.disconnect()
+    }
   }
 }
 

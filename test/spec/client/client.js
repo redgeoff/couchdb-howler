@@ -1,6 +1,3 @@
-// TODO: how to prevent connection w/o auth? Need to close if not logIn in X seconds? Also appears
-// that can pass query params when connecting: https://socket.io/docs/client-api/#with-query-option
-
 import Client from '../../../src/client/client'
 import testUtils from '../../utils'
 
@@ -24,6 +21,10 @@ describe('client', () => {
   afterEach(() => {
     client.stop()
   })
+
+  // TODO: test authentication
+
+  // TODO: test cookie auth
 
   // it('should not subscribe if not authenticated', async () => {
   //   await testUtils.shouldThrow(async () => {
@@ -58,5 +59,9 @@ describe('client', () => {
 
     await test()
     await test()
+  })
+
+  it('should stop without being connected', () => {
+    // Intentionally left empty
   })
 })
