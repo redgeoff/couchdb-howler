@@ -32,7 +32,7 @@ class Sockets {
   // getCookie (socket) {
   //   return this._sockets[socket.id].cookie
   // }
-  //
+
   // clearCookie (socket) {
   //   delete this._sockets[socket.id].cookie
   // }
@@ -82,7 +82,10 @@ class Sockets {
 
   close () {
     // Close each socket connection
-    sporks.each(this._sockets, socket => socket.disconnect())
+    sporks.each(this._sockets, socket => {
+      socket.disconnect()
+      this.remove(socket)
+    })
   }
 }
 

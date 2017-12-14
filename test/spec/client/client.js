@@ -51,12 +51,12 @@ describe('client', () => {
   it('should log in, subscribe, unsubscribe, log out and repeat', async () => {
     const test = async () => {
       await client.logIn(testUtils.username, testUtils.password)
-      // await client.subscribe('my-db')
-      // await client.unsubscribe('my-db')
-      // await client.logOut()
+      await client.subscribe('my-db')
+      await client.unsubscribe('my-db')
+      await client.logOut()
     }
 
     await test()
-    // await test()
+    await test()
   })
 })

@@ -41,27 +41,24 @@ class Server {
   async _authenticate (socket) {
     try {
       let params = socket.handshake.query
-      var name = params.cookie ? params.cookie : params.username
 
-      this._logSocketInfo(socket, 'authentication attempt for ' + name)
+      this._logSocketInfo(socket, 'authentication attempt')
 
       let response = await this._logInOrVerifyLogin(socket, params)
 
-      this._logSocketInfo(socket, 'authentication success for ' + name)
-      console.log('response=', response)
+      this._logSocketInfo(socket, 'authentication success')
       socket.emit('authenticated', { cookie: response.cookie })
 
       this._onAuthenticated(socket)
     } catch (err) {
-      this._logSocketInfo(
-        socket,
-        'authentication failure for ' + name + ', err=' + JSON.stringify(err)
-      )
+      this._logSocketInfo(socket, 'authentication failure=' + JSON.stringify(err))
       socket.emit('not-authenticated', err)
     }
   }
 
   _onConnection () {
+    // We handle the authentication during the connection so that it is slightly harder for a DDOS
+    // attack to exhaust our connection pool
     this._io.on('connection', async socket => {
       this._logSocketInfo(socket, 'connection')
       await this._authenticate(socket)
@@ -87,16 +84,15 @@ class Server {
   }
 
   _onLogOut (socket) {
-    this._addSocketListener({
-      socket: socket,
-      eventName: 'log-out',
-      promiseFactory: async (socket, params) => {
-        this._logSocketInfo(socket, 'log-out for ' + this._sockets.getCookie(socket))
+    // We cannot use _addSocketListener as we need to respond before issuing the disconnect
+    socket.on('log-out', (params, callback) => {
+      this._logSocketInfo(socket, 'logout, disconnecting...')
 
-        // Close the socket as we do not want a connection if it is not authorized. This will
-        // automatically trigger the disconnect event that will remove the socket from sockets
-        socket.destroy()
-      }
+      callback({})
+
+      // Close the socket as we do not want a connection if it is not authorized. This will
+      // automatically trigger the disconnect event that will remove the socket from sockets
+      socket.disconnect()
     })
   }
 
@@ -141,7 +137,7 @@ class Server {
     // Stop accepting connections
     this._io.close()
 
-    // Close each socket connection. TODO: need to manage this._sockets
+    // Close each socket connection
     this._sockets.close()
   }
 }
