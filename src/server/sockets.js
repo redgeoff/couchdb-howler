@@ -25,7 +25,11 @@ class Sockets {
     delete this._sockets[socket.id]
   }
 
-  get (dbName) {
+  get (id) {
+    return this._sockets[id]
+  }
+
+  getByDBName (dbName) {
     return this._socketsByDBName[dbName]
   }
 

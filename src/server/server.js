@@ -143,7 +143,7 @@ class Server {
     this._iterator.each(async change => {
       let dbName = this._toDBName(change)
 
-      let sockets = this._sockets.get(dbName)
+      let sockets = this._sockets.getByDBName(dbName)
 
       // Are there any subscribers to this DB?
       if (sockets) {
