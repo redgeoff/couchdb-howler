@@ -1,7 +1,17 @@
 import './chai'
-import './node-and-browser'
+import testUtils from './utils'
+import serverTestUtils from './server-utils'
 
-// describe('node', () => {
-//   it('should test only in node', async () => {
-//   })
-// })
+describe('node', () => {
+  before(async () => {
+    await serverTestUtils.createTestServer()
+    await testUtils.createTestUser()
+  })
+
+  after(async () => {
+    await serverTestUtils.destroyTestServer()
+    await testUtils.destroyTestUser()
+  })
+
+  require('./node-and-browser')
+})

@@ -1,18 +1,10 @@
 import Client from '../../../src/client/client'
 import testUtils from '../../utils'
 
-describe('client', () => {
+describe('client', function () {
+  this.timeout(15000)
+
   let client = null
-
-  before(async () => {
-    await testUtils.createTestServer()
-    await testUtils.createTestUser()
-  })
-
-  after(async () => {
-    await testUtils.destroyTestServer()
-    await testUtils.destroyTestUser()
-  })
 
   beforeEach(() => {
     client = new Client(testUtils.getServerURL())
@@ -22,32 +14,32 @@ describe('client', () => {
     client.stop()
   })
 
-  // TODO: test authentication
-
-  // TODO: test cookie auth
-
-  // it('should not subscribe if not authenticated', async () => {
-  //   await testUtils.shouldThrow(async () => {
-  //     await client.subscribe('my-db')
-  //   }, 'NotAuthenticatedError')
-  // })
+  // // TODO: test authentication
   //
-  // it('should subscribe', async () => {
-  //   await client.logIn(testUtils.username, testUtils.password)
-  //   await client.subscribe('my-db')
-  // })
+  // // TODO: test cookie auth
   //
-  // it('should not unsubscribe if not authenticated', async () => {
-  //   await testUtils.shouldThrow(async () => {
-  //     await client.unsubscribe('my-db')
-  //   }, 'NotAuthenticatedError')
-  // })
-  //
-  // it('should unsubscribe', async () => {
-  //   await client.logIn(testUtils.username, testUtils.password)
-  //   await client.subscribe('my-db')
-  //   await client.unsubscribe('my-db')
-  // })
+  // // it('should not subscribe if not authenticated', async () => {
+  // //   await testUtils.shouldThrow(async () => {
+  // //     await client.subscribe('my-db')
+  // //   }, 'NotAuthenticatedError')
+  // // })
+  // //
+  // // it('should subscribe', async () => {
+  // //   await client.logIn(testUtils.username, testUtils.password)
+  // //   await client.subscribe('my-db')
+  // // })
+  // //
+  // // it('should not unsubscribe if not authenticated', async () => {
+  // //   await testUtils.shouldThrow(async () => {
+  // //     await client.unsubscribe('my-db')
+  // //   }, 'NotAuthenticatedError')
+  // // })
+  // //
+  // // it('should unsubscribe', async () => {
+  // //   await client.logIn(testUtils.username, testUtils.password)
+  // //   await client.subscribe('my-db')
+  // //   await client.unsubscribe('my-db')
+  // // })
 
   it('should log in, subscribe, unsubscribe, log out and repeat', async () => {
     const test = async () => {
@@ -61,7 +53,7 @@ describe('client', () => {
     await test()
   })
 
-  it('should stop without being connected', () => {
-    // Intentionally left empty
-  })
+  // it('should stop without being connected', () => {
+  //   // Intentionally left empty
+  // })
 })

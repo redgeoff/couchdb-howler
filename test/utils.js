@@ -1,6 +1,5 @@
-import config from './config.json'
+import config from './config'
 import Slouch from 'couch-slouch'
-import Server from '../src/server/server'
 
 class Utils {
   constructor () {
@@ -25,15 +24,6 @@ class Utils {
       ':' +
       config.couchdb.port
     )
-  }
-
-  async createTestServer () {
-    this._server = new Server({ port: config.server.port, 'couchdb-url': this.getCouchDBURL() })
-    await this._server.start()
-  }
-
-  async destroyTestServer () {
-    await this._server.stop()
   }
 
   async createTestUser () {

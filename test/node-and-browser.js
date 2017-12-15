@@ -1,4 +1,3 @@
-import 'babel-polyfill'
 import './spec/client'
-import './spec/server'
-import './integration'
+// import './spec/server'
+// import './integration'

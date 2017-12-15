@@ -27,16 +27,16 @@
     "browser-server":
       "npm run compile-test && node_modules/gofur/scripts/browser/serve.js -c cache -t cache/compiled/test/browser.js",
     "browser-test":
-      "npm run compile-test && node_modules/gofur/scripts/browser/test.js -c cache -t cache/compiled/test/browser.js",
+      "npm run compile-test && node_modules/gofur/scripts/browser/test.js -c cache -t cache/compiled/test/browser.js -s cache/compiled/test/server.js",
     "browser-test-firefox":
-      "npm run compile-test && node_modules/gofur/scripts/browser/test.js -c cache -t cache/compiled/test/browser.js -b selenium:firefox",
+      "npm run compile-test && node_modules/gofur/scripts/browser/test.js -c cache -t cache/compiled/test/browser.js -b selenium:firefox -s cache/compiled/test/server.js",
     "browser-test-chrome":
-      "npm run compile-test && node_modules/gofur/scripts/browser/test.js -c cache -t cache/compiled/test/browser.js -b selenium:chrome",
+      "npm run compile-test && node_modules/gofur/scripts/browser/test.js -c cache -t cache/compiled/test/browser.js -b selenium:chrome -s cache/compiled/test/server.js",
     "browser-test-phantomjs":
-      "npm run compile-test && node_modules/gofur/scripts/browser/test.js -c cache -t cache/compiled/test/browser.js -b selenium:phantomjs",
+      "npm run compile-test && node_modules/gofur/scripts/browser/test.js -c cache -t cache/compiled/test/browser.js -b selenium:phantomjs -s cache/compiled/test/server.js",
     "browser-test-phantomjs":
-      "npm run compile-test && node_modules/gofur/scripts/browser/test.js -c cache -t cache/compiled/test/browser.js -b selenium:phantomjs",
-    "test": "npm run lint && npm run node-full-test",
+      "npm run compile-test && node_modules/gofur/scripts/browser/test.js -c cache -t cache/compiled/test/browser.js -b selenium:phantomjs -s cache/compiled/test/server.js",
+    "test": "npm run lint && npm run node-full-test && npm run browser-test-phantomjs",
     "reset-db": "./scripts/reset-db.js"
   },
   "dependencies": {
@@ -64,7 +64,7 @@
     "eslint-plugin-node": "^5.2.0",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-standard": "^3.0.1",
-    "gofur": "0.0.9",
+    "gofur": "^1.0.0",
     "istanbul": "^0.4.5",
     "mocha": "^4.0.1",
     "nyc": "^11.3.0",
@@ -75,14 +75,14 @@
   },
   "nyc": {
     "check-coverage": true,
-    "lines": 100,
-    "statements": 100,
-    "functions": 100,
-    "branches": 100,
+    "lines": 10,
+    "statements": 10,
+    "functions": 10,
+    "branches": 10,
     "require": ["babel-register"],
     "reporter": ["lcov", "text-summary"],
     "cache": true,
-    "all": true,
+    "all": false,
     "include": ["src/**/*.js"],
     "report-dir": "./cache/coverage/node",
     "sourceMap": false,

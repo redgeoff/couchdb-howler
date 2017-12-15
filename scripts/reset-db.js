@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const Slouch = require('couch-slouch')
-const config = require('../test/config.json')
+const config = require('../test/config')
 
 let slouch = new Slouch(
   config.couchdb.scheme +
