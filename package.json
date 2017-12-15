@@ -20,7 +20,7 @@
     "compile-test": "babel src -d cache/compiled/src && babel test -d cache/compiled/test",
     "compile-for-assert": "babel src -d cache/compiled/src",
     "diff-for-assert":
-      "if [ \"$(diff lib/ cache/compiled/src)\" != \"\" ]; then echo 'Error: you need to execute \"npm run compile\"'; exit 1; fi",
+      "if [ \"$(diff -arq lib/ cache/compiled/src)\" != \"\" ]; then echo 'Error: you need to execute \"npm run compile\"'; exit 1; fi",
     "assert-compiled": "npm run compile-for-assert && npm run diff-for-assert",
     "node-test": "npm run compile && mocha --require babel-core/register test/node.js",
     "node-full-test": "npm run compile && cross-env NODE_ENV=test nyc mocha test/node.js",
