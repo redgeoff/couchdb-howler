@@ -93,8 +93,8 @@ class Sockets {
   close () {
     // Close each socket connection
     sporks.each(this._sockets, socket => {
-      socket.disconnect()
-      this.remove(socket)
+      socket.socket.disconnect()
+      this.remove(socket.socket)
     })
   }
 }

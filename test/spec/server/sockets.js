@@ -1,10 +1,12 @@
 import Sockets from '../../../src/server/sockets'
 import testUtils from '../../utils'
+import sinon from 'sinon'
+import MockSocket from './mock-socket'
 
 describe('sockets', () => {
   let sockets = null
-  let socket1 = { id: 1 }
-  let socket2 = { id: 2 }
+  let socket1 = new MockSocket(1)
+  let socket2 = new MockSocket(2)
 
   beforeEach(() => {
     sockets = new Sockets()
@@ -136,5 +138,19 @@ describe('sockets', () => {
     testUtils.shouldEqual(sockets.getByDBName('db2'), undefined)
     sockets.getByDBName('db3').should.eql({ [socket1.id]: socket1, [socket2.id]: socket2 })
     sockets.getByDBName('db4').should.eql({ [socket2.id]: socket2 })
+  })
+
+  it('should close', () => {
+    sinon.spy(sockets, 'remove')
+    sinon.spy(sockets, 'close')
+
+    sockets.add(socket1)
+    sockets.add(socket2)
+
+    sockets.close()
+
+    sockets.remove.calledTwice.should.eql(true)
+    socket1.disconnect.calledOnce.should.eql(true)
+    socket2.disconnect.calledOnce.should.eql(true)
   })
 })
