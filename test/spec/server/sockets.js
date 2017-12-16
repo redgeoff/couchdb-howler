@@ -2,9 +2,13 @@ import Sockets from '../../../src/server/sockets'
 import testUtils from '../../utils'
 
 describe('sockets', () => {
-  let sockets = new Sockets()
+  let sockets = null
   let socket1 = { id: 1 }
   let socket2 = { id: 2 }
+
+  beforeEach(() => {
+    sockets = new Sockets()
+  })
 
   it('should add and remove', () => {
     sockets.add(socket1)
@@ -49,15 +53,80 @@ describe('sockets', () => {
     })
 
     sockets.get(socket2.id).should.eql({
-      socket: socket1,
+      socket: socket2,
       dbNames: { db1: true, db3: true, db4: true }
     })
 
     sockets.getByDBName('db1').should.eql({ [socket1.id]: socket1, [socket2.id]: socket2 })
-    sockets.getByDBName('db3').should.eql({ [socket1.id]: socket1, [socket2.id]: socket2 })
     sockets.getByDBName('db2').should.eql({ [socket1.id]: socket1 })
-    sockets.getByDBName('db4').should.eql({ [socket4.id]: socket4 })
+    sockets.getByDBName('db3').should.eql({ [socket1.id]: socket1, [socket2.id]: socket2 })
+    sockets.getByDBName('db4').should.eql({ [socket2.id]: socket2 })
   })
 
-  // it('should unsubscribe', () => {})
+  it('should unsubscribe', () => {
+    sockets.add(socket1)
+    sockets.subscribe(socket1, ['db1', 'db2', 'db3', 'db4'])
+    sockets.unsubscribe(socket1, ['db1', 'db3'])
+
+    sockets.get(socket1.id).should.eql({
+      socket: socket1,
+      dbNames: { db2: true, db4: true }
+    })
+
+    testUtils.shouldEqual(sockets.getByDBName('db1'), undefined)
+    sockets.getByDBName('db2').should.eql({ [socket1.id]: socket1 })
+    testUtils.shouldEqual(sockets.getByDBName('db3'), undefined)
+    sockets.getByDBName('db4').should.eql({ [socket1.id]: socket1 })
+  })
+
+  it('should unsubscribe from all', () => {
+    sockets.add(socket1)
+    sockets.subscribe(socket1, ['db1', 'db2'])
+    sockets.unsubscribe(socket1, ['db1', 'db2'])
+
+    sockets.get(socket1.id).should.eql({
+      socket: socket1,
+      dbNames: {}
+    })
+
+    testUtils.shouldEqual(sockets.getByDBName('db1'), undefined)
+    testUtils.shouldEqual(sockets.getByDBName('db2'), undefined)
+  })
+
+  it('should unsubscribe when not subscribed', () => {
+    sockets.add(socket1)
+    sockets.unsubscribe(socket1, ['db1'])
+
+    sockets.get(socket1.id).should.eql({
+      socket: socket1,
+      dbNames: {}
+    })
+
+    testUtils.shouldEqual(sockets.getByDBName('db1'), undefined)
+  })
+
+  it('should unsubscribe when db subscribed to by multiple dbs', () => {
+    sockets.add(socket1)
+    sockets.subscribe(socket1, ['db1', 'db2', 'db3'])
+
+    sockets.add(socket2)
+    sockets.subscribe(socket2, ['db1', 'db3', 'db4'])
+
+    sockets.unsubscribe(socket1, ['db1', 'db2'])
+
+    sockets.get(socket1.id).should.eql({
+      socket: socket1,
+      dbNames: { db3: true }
+    })
+
+    sockets.get(socket2.id).should.eql({
+      socket: socket2,
+      dbNames: { db1: true, db3: true, db4: true }
+    })
+
+    sockets.getByDBName('db1').should.eql({ [socket2.id]: socket2 })
+    testUtils.shouldEqual(sockets.getByDBName('db2'), undefined)
+    sockets.getByDBName('db3').should.eql({ [socket1.id]: socket1, [socket2.id]: socket2 })
+    sockets.getByDBName('db4').should.eql({ [socket2.id]: socket2 })
+  })
 })

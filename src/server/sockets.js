@@ -71,7 +71,9 @@ class Sockets {
   }
 
   _removeDBFromSocketsByDBName (socket, dbName) {
-    delete this._socketsByDBName[dbName][socket.id]
+    if (this._socketsByDBName[dbName]) {
+      delete this._socketsByDBName[dbName][socket.id]
+    }
 
     // No more sockets for this dbName?
     if (sporks.length(this._socketsByDBName[dbName]) === 0) {
