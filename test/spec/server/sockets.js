@@ -28,6 +28,14 @@ describe('sockets', () => {
     sockets.getByDBName('db1').should.eql({ [socket1.id]: socket1 })
   })
 
+  it('should remove subscriptions', () => {
+    sockets.add(socket1)
+    sockets.subscribe(socket1, ['db1', 'db2'])
+    sockets.remove(socket1)
+    testUtils.shouldEqual(sockets.getByDBName('db1'), undefined)
+    testUtils.shouldEqual(sockets.getByDBName('db2'), undefined)
+  })
+
   it('subscribe should handle duplicate subscriptions', () => () => {
     sockets.add(socket1)
     sockets.subscribe(socket1, ['db1', 'db2', 'db3', 'db4'])

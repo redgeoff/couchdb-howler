@@ -17,8 +17,8 @@ class Sockets {
 
   remove (socket) {
     // Remove any corresponding entries in socketsByDBName
-    sporks.each(this._sockets[socket.id].dbNames, dbName => {
-      this._unsubscribe(socket, dbName)
+    sporks.each(this._sockets[socket.id].dbNames, (key, dbName) => {
+      this._unsubscribeFromDB(socket, dbName)
     })
 
     // Remove the socket
@@ -63,7 +63,7 @@ class Sockets {
   }
 
   subscribe (socket, dbNames) {
-    sporks.each(dbNames, dbName => this._subscribeToDB(socket, dbName))
+    dbNames.forEach(dbName => this._subscribeToDB(socket, dbName))
   }
 
   _removeDBFromSockets (socket, dbName) {
