@@ -1,4 +1,5 @@
 import sporks from 'sporks'
+import log from './log'
 
 class Sockets {
   constructor () {
@@ -96,6 +97,28 @@ class Sockets {
       socket.socket.disconnect()
       this.remove(socket.socket)
     })
+  }
+
+  log (socket, msg) {
+    log.info(
+      {
+        socketId: socket.id,
+        remoteAddress: socket.conn.remoteAddress
+      },
+      msg
+    )
+  }
+
+  emitChangeForDBName (dbName) {
+    let sockets = this.getByDBName(dbName)
+
+    // Are there any subscribers to this DB?
+    if (sockets) {
+      sporks.each(sockets, socket => {
+        this.log(socket, dbName + ' changed')
+        socket.emit('change', dbName)
+      })
+    }
   }
 }
 

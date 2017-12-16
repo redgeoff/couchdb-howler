@@ -153,4 +153,23 @@ describe('sockets', () => {
     socket1.disconnect.calledOnce.should.eql(true)
     socket2.disconnect.calledOnce.should.eql(true)
   })
+
+  it('should emit change for db name', () => {
+    sockets.add(socket1)
+    sockets.subscribe(socket1, ['db1', 'db2'])
+    sockets.add(socket2)
+    sockets.subscribe(socket2, ['db1', 'db3'])
+
+    // Sanity test for when there are no subscribers
+    sockets.emitChangeForDBName('db4')
+    socket1.emit.notCalled.should.eql(true)
+    socket2.emit.notCalled.should.eql(true)
+
+    // For 2 subscribers
+    sockets.emitChangeForDBName('db1')
+    socket1.emit.calledOnce.should.eql(true)
+    socket1.emit.getCall(0).args.should.eql(['change', 'db1'])
+    socket2.emit.calledOnce.should.eql(true)
+    socket2.emit.getCall(0).args.should.eql(['change', 'db1'])
+  })
 })
