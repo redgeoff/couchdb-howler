@@ -15,5 +15,10 @@ module.exports = {
     scheme: 'http',
     host: 'localhost',
     port: 3001
+  },
+  server3: {
+    scheme: 'http',
+    host: 'localhost',
+    port: 3002
   }
 }

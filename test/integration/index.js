@@ -1,36 +1,11 @@
 import Client from '../../index'
 import testUtils from '../utils'
 import sporks from 'sporks'
-import spawner from '../spawner'
-import config from '../config.js'
-import path from 'path'
 
 describe('integration', function () {
   this.timeout(25000)
 
   let client = null
-  let server = null
-
-  const createTestServer = () => {
-    server = spawner.run(path.join(__dirname, '../../bin/server.js'), [
-      '--port',
-      config.server2.port,
-      '--couchdb-url',
-      testUtils.getCouchDBURL()
-    ])
-  }
-
-  const destroyTestServer = async () => {
-    await spawner.kill(server)
-  }
-
-  before(() => {
-    createTestServer()
-  })
-
-  after(async () => {
-    await destroyTestServer()
-  })
 
   const createTestDB = async () => {
     await testUtils.slouch.db.create('test_db')

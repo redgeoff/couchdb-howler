@@ -4,16 +4,15 @@ import testServerUtils from './server-utils'
 
 describe('node', () => {
   before(async () => {
-    await testServerUtils.createTestServer()
+    await testServerUtils.createTestServers()
     await testUtils.createTestUser()
   })
 
   after(async () => {
-    await testServerUtils.destroyTestServer()
+    await testServerUtils.destroyTestServers()
     await testUtils.destroyTestUser()
   })
 
-  require('./integration')
   require('./node-and-browser')
   require('./spec/server')
 })
