@@ -5,7 +5,7 @@ import testUtils from './utils'
 class Utils {
   async createTestServer () {
     this._server = new Server({
-      port: config.server.port,
+      port: config.server1.port,
       'couchdb-url': testUtils.getCouchDBURL()
     })
     await this._server.start()

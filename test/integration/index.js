@@ -1,13 +1,36 @@
-// TODO: actually use CL for server
-
-import Client from '../../src/client/client'
+import Client from '../../index'
 import testUtils from '../utils'
 import sporks from 'sporks'
+import spawner from '../spawner'
+import config from '../config.js'
+import path from 'path'
 
 describe('integration', function () {
-  this.timeout(5000)
+  this.timeout(10000)
 
   let client = null
+  let server = null
+
+  const createTestServer = () => {
+    server = spawner.run(path.join(__dirname, '../../bin/server.js'), [
+      '--port',
+      config.server2.port,
+      '--couchdb-url',
+      testUtils.getCouchDBURL()
+    ])
+  }
+
+  const destroyTestServer = async () => {
+    await spawner.kill(server)
+  }
+
+  before(() => {
+    createTestServer()
+  })
+
+  after(async () => {
+    await destroyTestServer()
+  })
 
   const createTestDB = async () => {
     await testUtils.slouch.db.create('test_db')
@@ -18,7 +41,7 @@ describe('integration', function () {
   }
 
   beforeEach(async () => {
-    client = new Client(testUtils.getServerURL())
+    client = new Client(testUtils.getServer2URL())
     await createTestDB()
   })
 

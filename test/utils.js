@@ -8,8 +8,12 @@ class Utils {
     this.password = 'secret'
   }
 
-  getServerURL () {
-    return config.server.scheme + '://' + config.server.host + ':' + config.server.port
+  getServer1URL () {
+    return config.server1.scheme + '://' + config.server1.host + ':' + config.server1.port
+  }
+
+  getServer2URL () {
+    return config.server2.scheme + '://' + config.server2.host + ':' + config.server2.port
   }
 
   getCouchDBURL () {

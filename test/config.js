@@ -6,9 +6,14 @@ module.exports = {
     username: 'admin',
     password: 'admin'
   },
-  server: {
+  server1: {
     scheme: 'http',
     host: 'localhost',
     port: 3000
+  },
+  server2: {
+    scheme: 'http',
+    host: 'localhost',
+    port: 3001
   }
 }

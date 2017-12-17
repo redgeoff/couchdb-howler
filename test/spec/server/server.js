@@ -16,7 +16,7 @@ describe('server', function () {
   }
 
   beforeEach(async () => {
-    client = new Client(testUtils.getServerURL())
+    client = new Client(testUtils.getServer1URL())
     await createTestDB()
   })
 

@@ -7,7 +7,7 @@ describe('client', function () {
   let client = null
 
   beforeEach(() => {
-    client = new Client(testUtils.getServerURL())
+    client = new Client(testUtils.getServer1URL())
   })
 
   afterEach(() => {
