@@ -17,8 +17,17 @@ class Utils {
     await this._server1.stop()
   }
 
+  rootPath () {
+    if (/cache/.test(__dirname)) {
+      // The path is relative to cache/compiled/test
+      return path.join(__dirname, '/../../..')
+    } else {
+      return path.join(__dirname, '/..')
+    }
+  }
+
   async createTestServer2 () {
-    this._server2 = spawner.run(path.join(__dirname, '../bin/server.js'), [
+    this._server2 = spawner.run(path.join(this.rootPath(), 'bin/server.js'), [
       '--port',
       config.server2.port,
       '--couchdb-url',

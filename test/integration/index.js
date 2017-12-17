@@ -1,4 +1,4 @@
-import Client from '../../index'
+import Client from '../../src'
 import testUtils from '../utils'
 import sporks from 'sporks'
 
