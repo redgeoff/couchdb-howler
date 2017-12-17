@@ -6,7 +6,7 @@ import config from '../config.js'
 import path from 'path'
 
 describe('integration', function () {
-  this.timeout(10000)
+  this.timeout(25000)
 
   let client = null
   let server = null

@@ -31,17 +31,17 @@ class Command {
 
   async _start () {
     try {
-      var server = new Server(this._argv)
-      await server.start()
+      this._server = new Server(this._argv)
+      await this._server.start()
 
       // Gracefully handle SIGINT signals
       process.on('SIGINT', async () => {
-        log.info('Stopping as received SIGNINT')
-        await server.stop()
+        log.info('Stopping as received SIGINT')
+        await this._server.stop()
       })
     } catch (err) {
       try {
-        await server.stop()
+        await this._server.stop()
       } catch (err) {
         log.error('failed to stop')
       }
