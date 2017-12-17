@@ -38,9 +38,9 @@ class Sockets {
     this._sockets[socket.id].cookie = cookie
   }
 
-  // getCookie (socket) {
-  //   return this._sockets[socket.id].cookie
-  // }
+  getCookie (socket) {
+    return this._sockets[socket.id].cookie
+  }
 
   // clearCookie (socket) {
   //   delete this._sockets[socket.id].cookie

@@ -19,6 +19,12 @@ describe('sockets', () => {
     testUtils.shouldEqual(sockets.get(socket1.id), undefined)
   })
 
+  it('should add if already added', () => {
+    sockets.add(socket1)
+    sockets.add(socket1)
+    sockets.get(socket1.id).should.eql({ socket: socket1, dbNames: {} })
+  })
+
   it('should subscribe', () => {
     sockets.add(socket1)
     sockets.subscribe(socket1, ['db1', 'db2', 'db3', 'db4'])
@@ -171,5 +177,12 @@ describe('sockets', () => {
     socket1.emit.getCall(0).args.should.eql(['change', 'db1'])
     socket2.emit.calledOnce.should.eql(true)
     socket2.emit.getCall(0).args.should.eql(['change', 'db1'])
+  })
+
+  it('should set and get cookie', () => {
+    let cookie = 'monster'
+    sockets.add(socket1)
+    sockets.setCookie(socket1, cookie)
+    sockets.getCookie(socket1).should.eql(cookie)
   })
 })
