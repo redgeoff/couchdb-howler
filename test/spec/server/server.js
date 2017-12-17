@@ -1,6 +1,5 @@
 import Client from '../../../src/client/client'
 import testUtils from '../../utils'
-import testServerUtils from '../../server-utils'
 import sporks from 'sporks'
 
 describe('server', function () {
