@@ -3,7 +3,6 @@ import log from './log'
 import Sockets from './sockets'
 import utils from './utils'
 import Slouch from 'couch-slouch'
-import sporks from 'sporks'
 
 class Server {
   constructor (opts) {
