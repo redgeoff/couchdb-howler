@@ -2,17 +2,17 @@
 
 import 'babel-polyfill'
 import testUtils from './utils'
-import serverTestUtils from './server-utils'
+import testServerUtils from './server-utils'
 
 // Start test server
 const start = async () => {
-  await serverTestUtils.createTestServer()
+  await testServerUtils.createTestServer()
   await testUtils.createTestUser()
 }
 
 start()
 
 process.on('SIGINT', async () => {
-  await serverTestUtils.destroyTestServer()
+  await testServerUtils.destroyTestServer()
   await testUtils.destroyTestUser()
 })

@@ -1,15 +1,15 @@
 import './chai'
 import testUtils from './utils'
-import serverTestUtils from './server-utils'
+import testServerUtils from './server-utils'
 
 describe('node', () => {
   before(async () => {
-    await serverTestUtils.createTestServer()
+    await testServerUtils.createTestServer()
     await testUtils.createTestUser()
   })
 
   after(async () => {
-    await serverTestUtils.destroyTestServer()
+    await testServerUtils.destroyTestServer()
     await testUtils.destroyTestUser()
   })
 
