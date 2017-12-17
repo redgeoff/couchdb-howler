@@ -2,23 +2,12 @@
 
 import Client from '../../src/client/client'
 import testUtils from '../utils'
-import testServerUtils from '../../server-utils'
 import sporks from 'sporks'
 
 describe('integration', function () {
   this.timeout(5000)
 
   let client = null
-
-  before(async () => {
-    await testServerUtils.createTestServer()
-    await testUtils.createTestUser()
-  })
-
-  after(async () => {
-    await testServerUtils.destroyTestServer()
-    await testUtils.destroyTestUser()
-  })
 
   const createTestDB = async () => {
     await testUtils.slouch.db.create('test_db')

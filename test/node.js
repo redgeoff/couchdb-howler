@@ -13,6 +13,7 @@ describe('node', () => {
     await testUtils.destroyTestUser()
   })
 
+  require('./integration')
   require('./node-and-browser')
   require('./spec/server')
 })
