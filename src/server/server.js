@@ -3,7 +3,6 @@ import log from './log'
 import Sockets from './sockets'
 import utils from './utils'
 import Slouch from 'couch-slouch'
-import sporks from 'sporks'
 
 class Server {
   constructor (opts) {
@@ -44,16 +43,16 @@ class Server {
     try {
       let params = socket.handshake.query
 
-      this._logSocketInfo(socket, 'authentication attempt')
+      this._sockets.log(socket, 'authentication attempt')
 
       let response = await this._logInOrVerifyLogin(socket, params)
 
-      this._logSocketInfo(socket, 'authentication success')
+      this._sockets.log(socket, 'authentication success')
       socket.emit('authenticated', { cookie: response.cookie })
 
       this._onAuthenticated(socket)
     } catch (err) {
-      this._logSocketInfo(socket, 'authentication failure=' + JSON.stringify(err))
+      this._sockets.log(socket, 'authentication failure=' + JSON.stringify(err))
       socket.emit('not-authenticated', err)
     }
   }
@@ -62,19 +61,9 @@ class Server {
     // We handle the authentication during the connection so that it is slightly harder for a DDOS
     // attack to exhaust our connection pool
     this._io.on('connection', async socket => {
-      this._logSocketInfo(socket, 'connection')
+      this._sockets.log(socket, 'connection')
       await this._authenticate(socket)
     })
-  }
-
-  _logSocketInfo (socket, msg) {
-    log.info(
-      {
-        socketId: socket.id,
-        remoteAddress: socket.conn.remoteAddress
-      },
-      msg
-    )
   }
 
   _addSocketListener (opts) {
@@ -88,7 +77,7 @@ class Server {
   _onLogOut (socket) {
     // We cannot use _addSocketListener as we need to respond before issuing the disconnect
     socket.on('log-out', (params, callback) => {
-      this._logSocketInfo(socket, 'logout, disconnecting...')
+      this._sockets.log(socket, 'logout, disconnecting...')
 
       let obj = {}
       callback(obj)
@@ -104,7 +93,7 @@ class Server {
       socket: socket,
       eventName: 'subscribe',
       promiseFactory: async (socket, dbNames) => {
-        this._logSocketInfo(socket, 'subscribe to dbName=' + JSON.stringify(dbNames))
+        this._sockets.log(socket, 'subscribe to dbName=' + JSON.stringify(dbNames))
         this._sockets.subscribe(socket, dbNames)
       }
     })
@@ -115,7 +104,7 @@ class Server {
       socket: socket,
       eventName: 'unsubscribe',
       promiseFactory: async (socket, dbNames) => {
-        this._logSocketInfo(socket, 'unsubscribe from dbName=' + JSON.stringify(dbNames))
+        this._sockets.log(socket, 'unsubscribe from dbName=' + JSON.stringify(dbNames))
         this._sockets.unsubscribe(socket, dbNames)
       }
     })
@@ -124,7 +113,7 @@ class Server {
   _onDisconnect (socket) {
     // The disconnect event is different than others so we don't use _addSocketListener
     socket.on('disconnect', () => {
-      this._logSocketInfo(socket, 'disconnect')
+      this._sockets.log(socket, 'disconnect')
       this._sockets.remove(socket)
     })
   }
@@ -142,16 +131,7 @@ class Server {
 
     this._iterator.each(async change => {
       let dbName = this._toDBName(change)
-
-      let sockets = this._sockets.get(dbName)
-
-      // Are there any subscribers to this DB?
-      if (sockets) {
-        sporks.each(sockets, socket => {
-          this._logSocketInfo(socket, dbName + ' changed')
-          socket.emit('change', dbName)
-        })
-      }
+      this._sockets.emitChangeForDBName(dbName)
     })
   }
 

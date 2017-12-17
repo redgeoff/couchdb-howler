@@ -14,4 +14,5 @@ describe('node', () => {
   })
 
   require('./node-and-browser')
+  require('./spec/server')
 })

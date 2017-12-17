@@ -1,4 +1,5 @@
 import sporks from 'sporks'
+import log from './log'
 
 class Sockets {
   constructor () {
@@ -10,22 +11,26 @@ class Sockets {
     if (!this._sockets[socket.id]) {
       this._sockets[socket.id] = {
         socket: socket,
-        dbNames: []
+        dbNames: {}
       }
     }
   }
 
   remove (socket) {
     // Remove any corresponding entries in socketsByDBName
-    this._sockets[socket.id].dbNames.forEach(dbName => {
-      this._unsubscribe(socket, dbName)
+    sporks.each(this._sockets[socket.id].dbNames, (key, dbName) => {
+      this._unsubscribeFromDB(socket, dbName)
     })
 
     // Remove the socket
     delete this._sockets[socket.id]
   }
 
-  get (dbName) {
+  get (id) {
+    return this._sockets[id]
+  }
+
+  getByDBName (dbName) {
     return this._socketsByDBName[dbName]
   }
 
@@ -33,9 +38,9 @@ class Sockets {
     this._sockets[socket.id].cookie = cookie
   }
 
-  // getCookie (socket) {
-  //   return this._sockets[socket.id].cookie
-  // }
+  getCookie (socket) {
+    return this._sockets[socket.id].cookie
+  }
 
   // clearCookie (socket) {
   //   delete this._sockets[socket.id].cookie
@@ -67,7 +72,9 @@ class Sockets {
   }
 
   _removeDBFromSocketsByDBName (socket, dbName) {
-    delete this._socketsByDBName[dbName][socket.id]
+    if (this._socketsByDBName[dbName]) {
+      delete this._socketsByDBName[dbName][socket.id]
+    }
 
     // No more sockets for this dbName?
     if (sporks.length(this._socketsByDBName[dbName]) === 0) {
@@ -87,9 +94,31 @@ class Sockets {
   close () {
     // Close each socket connection
     sporks.each(this._sockets, socket => {
-      socket.disconnect()
-      this.remove(socket)
+      socket.socket.disconnect()
+      this.remove(socket.socket)
     })
+  }
+
+  log (socket, msg) {
+    log.info(
+      {
+        socketId: socket.id,
+        remoteAddress: socket.conn.remoteAddress
+      },
+      msg
+    )
+  }
+
+  emitChangeForDBName (dbName) {
+    let sockets = this.getByDBName(dbName)
+
+    // Are there any subscribers to this DB?
+    if (sockets) {
+      sporks.each(sockets, socket => {
+        this.log(socket, dbName + ' changed')
+        socket.emit('change', dbName)
+      })
+    }
   }
 }
 
