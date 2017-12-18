@@ -38,7 +38,7 @@ class Utils {
     await this.slouch.user.destroy(this.username)
   }
 
-  async shouldThrow (promiseFactory, errName) {
+  async shouldThrow (promiseFactory, errName, errMessage) {
     let err = null
 
     try {
@@ -47,7 +47,13 @@ class Utils {
       err = _err
     }
 
-    err.name.should.eql(errName)
+    if (errName) {
+      err.name.should.eql(errName)
+    }
+
+    if (errMessage) {
+      err.message.should.eql(errMessage)
+    }
   }
 
   // TODO: move to sporks

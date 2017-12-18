@@ -47,7 +47,7 @@ class Client extends events.EventEmitter {
   async _onceResponse (eventName) {
     let response = await sporks.once(this._socket, eventName)
     if (commonUtils.isError(response[0])) {
-      throw commonUtils.toError(response[0])
+      throw commonUtils.responseToError(response[0])
     } else {
       return response[0]
     }
@@ -143,7 +143,11 @@ class Client extends events.EventEmitter {
       const ack = obj => {
         this._throwIfError(obj, resolve, reject)
       }
-      this._socket.emit(eventName, args, ack)
+      if (!this._connected) {
+        reject(new Error('not connected'))
+      } else {
+        this._socket.emit(eventName, args, ack)
+      }
     })
   }
 

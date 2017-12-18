@@ -3,6 +3,7 @@ import log from './log'
 import Sockets from './sockets'
 import utils from './utils'
 import Slouch from 'couch-slouch'
+import commonUtils from '../utils'
 
 class Server {
   constructor (opts) {
@@ -53,7 +54,7 @@ class Server {
       this._onAuthenticated(socket)
     } catch (err) {
       this._sockets.log(socket, 'authentication failure=' + JSON.stringify(err))
-      socket.emit('not-authenticated', err)
+      socket.emit('not-authenticated', commonUtils.errorToResponse(err))
     }
   }
 
