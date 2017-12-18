@@ -5,10 +5,10 @@ import commonUtils from '../utils'
 import sporks from 'sporks'
 
 class Client extends events.EventEmitter {
-  constructor (url) {
+  constructor (url, session) {
     super()
     this._url = url
-    this._session = new Session()
+    this._session = session || new Session()
 
     // A list of the DB names for which we are already subscribed
     this._subscribedToDBs = {}
@@ -21,6 +21,7 @@ class Client extends events.EventEmitter {
   async _connectIfCookie () {
     // Already logged in? Use the cookie to authenticate
     let cookie = await this._session.get()
+    console.log('cookie=', cookie)
     if (cookie) {
       this._connectAndEmitIfError(null, null, cookie)
     }
@@ -121,7 +122,7 @@ class Client extends events.EventEmitter {
 
   async _connectAndEmitIfError (username, password, cookie) {
     try {
-      this._connect(username, password, cookie)
+      await this._connect(username, password, cookie)
     } catch (err) {
       this._emitError(err)
     }
@@ -154,6 +155,7 @@ class Client extends events.EventEmitter {
   async logIn (username, password, cookie) {
     let r = await this._connect(username, password, cookie)
     await this._session.set(r.cookie)
+    return r
   }
 
   async logOut () {

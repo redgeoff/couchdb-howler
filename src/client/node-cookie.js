@@ -1,24 +1,22 @@
-import cookie from './cookie'
-
-class Session {
+class NodeCookie {
   constructor () {
-    this._name = 'couchdb-howler-session'
+    this._cookies = {}
   }
 
   // We use the async keyword to allow for swapping out the session store with an async store
-  async set (id) {
-    cookie.set(this._name, id)
+  async set (name, id) {
+    this._cookies[name] = id
   }
 
   // We use the async keyword to allow for swapping out the session store with an async store
-  async get () {
-    return cookie.get(this._name)
+  async get (name) {
+    return this._cookies[name]
   }
 
   // We use the async keyword to allow for swapping out the session store with an async store
-  async clear () {
-    await cookie.remove(this._name)
+  async remove (name) {
+    delete this._cookies[name]
   }
 }
 
-module.exports = Session
+module.exports = new NodeCookie()
