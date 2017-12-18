@@ -79,6 +79,12 @@ describe('client', function () {
   })
 
   it('should log in with cookie', async () => {
+    await testUtils.shouldThrow(async () => {
+      await client.logIn(null, null, 'invalid-cookie')
+    }, 'NotAuthenticatedError')
+  })
+
+  it('should fail to log in with cookie', async () => {
     let cookie = await genCookie()
 
     let response = await client.logIn(null, null, cookie)
@@ -87,12 +93,6 @@ describe('client', function () {
     cookie = await client._session.get()
     testUtils.shouldNotEqual(cookie, undefined)
     cookie.should.eql(response.cookie)
-
-    await client.logOut()
-  })
-
-  it('should fail to log in with cookie', async () => {
-    // TODO
   })
 
   // TODO: test what happens when try to subscribe and haven't logged in
