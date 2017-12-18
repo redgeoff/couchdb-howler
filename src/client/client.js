@@ -21,7 +21,6 @@ class Client extends events.EventEmitter {
   async _connectIfCookie () {
     // Already logged in? Use the cookie to authenticate
     let cookie = await this._session.get()
-    console.log('cookie=', cookie)
     if (cookie) {
       this._connectAndEmitIfError(null, null, cookie)
     }
