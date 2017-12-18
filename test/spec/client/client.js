@@ -63,7 +63,14 @@ describe('client', function () {
   })
 
   it('should fail to log in with stored cookie', async () => {
-    // TODO
+    // Simulate having a bad or expired cookie
+    let session = new Session()
+    session.set('invalid-cookie')
+    client = new Client(testUtils.getServer1URL(), session)
+
+    // Wait for connection and make sure there was an error
+    let err = await sporks.once(client, 'error')
+    err[0].name.should.eql('NotAuthenticatedError')
   })
 
   it('should log in with cookie', async () => {
