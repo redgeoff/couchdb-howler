@@ -3,6 +3,7 @@ import Server from '../src/server/server'
 import testUtils from './utils'
 import spawner from './spawner'
 import path from 'path'
+import log from '../src/server/log'
 
 class Utils {
   async createTestServer1 () {
@@ -47,6 +48,13 @@ class Utils {
   async destroyTestServers () {
     await this.destroyTestServer1()
     await this.destroyTestServer2()
+  }
+
+  silenceLog () {
+    let funs = ['fatal', 'error', 'warn', 'info', 'debug', 'trace']
+    funs.forEach(fun => {
+      log[fun] = () => {}
+    })
   }
 }
 

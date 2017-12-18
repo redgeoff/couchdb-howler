@@ -1,9 +1,10 @@
-import './chai'
+import './set-up'
 import testUtils from './utils'
 import testServerUtils from './server-utils'
 
 describe('node', () => {
   before(async () => {
+    testServerUtils.silenceLog()
     await testServerUtils.createTestServers()
     await testUtils.createTestUser()
   })
