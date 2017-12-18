@@ -17,6 +17,13 @@ describe('client', function () {
     client.stop()
   })
 
+  const genCookie = async () => {
+    await client.logIn(testUtils.username, testUtils.password)
+    let cookie = await client._session.get()
+    await client.logOut()
+    return cookie
+  }
+
   it('should log in and log out', async () => {
     let response = await client.logIn(testUtils.username, testUtils.password)
 
@@ -45,9 +52,7 @@ describe('client', function () {
   })
 
   it('should log in with stored cookie', async () => {
-    await client.logIn(testUtils.username, testUtils.password)
-    let cookie = await client._session.get()
-    await client.logOut()
+    let cookie = await genCookie()
 
     // Create new client with a session to simulate creating session with a stored cookie
     let session = new Session()
@@ -74,7 +79,16 @@ describe('client', function () {
   })
 
   it('should log in with cookie', async () => {
-    // TODO
+    let cookie = await genCookie()
+
+    let response = await client.logIn(null, null, cookie)
+
+    testUtils.shouldNotEqual(response.cookie, undefined)
+    cookie = await client._session.get()
+    testUtils.shouldNotEqual(cookie, undefined)
+    cookie.should.eql(response.cookie)
+
+    await client.logOut()
   })
 
   it('should fail to log in with cookie', async () => {
