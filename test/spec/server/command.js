@@ -40,4 +40,10 @@ describe('command', () => {
 
     command._stop.calledOnce.should.eql(true)
   })
+
+  it('should catch error when stopping', async () => {
+    sinon.stub(command, '_stop').throws()
+    await command._onFatalError()
+    command._stop.calledOnce.should.eql(true)
+  })
 })
