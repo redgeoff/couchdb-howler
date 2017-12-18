@@ -38,21 +38,25 @@ class Utils {
     await this.slouch.user.destroy(this.username)
   }
 
-  async shouldThrow (promiseFactory, errName, errMessage) {
-    let err = null
+  async shouldThrow (promiseFactory, errName, errMessage, err) {
+    let e = null
 
     try {
       await promiseFactory()
     } catch (_err) {
-      err = _err
+      e = _err
     }
 
     if (errName) {
-      err.name.should.eql(errName)
+      e.name.should.eql(errName)
     }
 
     if (errMessage) {
-      err.message.should.eql(errMessage)
+      e.message.should.eql(errMessage)
+    }
+
+    if (err) {
+      e.should.eql(err)
     }
   }
 

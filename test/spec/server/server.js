@@ -1,7 +1,8 @@
 import Client from '../../../src/client/client'
 import testUtils from '../../utils'
-import serverUtils from '../../server-utils'
+import testServerUtils from '../../server-utils'
 import sporks from 'sporks'
+import sinon from 'sinon'
 
 describe('server', function () {
   this.timeout(5000)
@@ -50,7 +51,21 @@ describe('server', function () {
   })
 
   it('should stop when not already started', async () => {
-    await serverUtils.createTestServer3()
-    await serverUtils.destroyTestServer3()
+    await testServerUtils.createTestServer3()
+    await testServerUtils.destroyTestServer3()
+  })
+
+  it('should handle errors when subscribing', async () => {
+    let err = new Error('some-error')
+    sinon.stub(testServerUtils._server1._sockets, 'subscribe').throws(err)
+    await client.logIn(testUtils.username, testUtils.password)
+    await testUtils.shouldThrow(
+      async () => {
+        await client.subscribe('test_db')
+      },
+      null,
+      err.message
+    )
+    testServerUtils._server1._sockets.subscribe.calledOnce.should.eql(true)
   })
 })

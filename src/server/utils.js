@@ -13,7 +13,7 @@ class Utils {
 
   async respond (callback, promiseFactory) {
     try {
-      let r = promiseFactory ? await promiseFactory() : {}
+      let r = await promiseFactory()
       this._success(callback, r)
     } catch (err) {
       this._failure(callback, err)
