@@ -6,6 +6,15 @@ class Utils {
   responseToError (response) {
     let err = new Error(response.errorMessage)
     err.name = response.errorName
+    return err
+  }
+
+  errorToResponse (err) {
+    return {
+      error: true,
+      errorName: err.name,
+      errorMessage: err.message
+    }
   }
 
   // TODO: move to sporks

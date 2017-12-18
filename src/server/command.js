@@ -3,6 +3,11 @@ import Server from './server'
 import log from './log'
 
 class Command {
+  constructor (argv) {
+    this._usage(argv)
+    this._createServer()
+  }
+
   _usage (argv) {
     this._argv = yargs(argv)
       .usage('Usage: $0 [options]')
@@ -29,28 +34,42 @@ class Command {
       .epilog('Copyright 2017').argv
   }
 
+  async _stop () {
+    await this._server.stop()
+  }
+
+  _onSigIntFactory () {
+    return async () => {
+      log.info('Stopping as received SIGINT')
+      await this._stop()
+    }
+  }
+
+  async _onFatalError (err) {
+    try {
+      await this._stop()
+    } catch (err) {
+      log.error('failed to stop')
+    }
+    log.fatal(err)
+  }
+
+  _createServer () {
+    this._server = new Server(this._argv)
+
+    // Gracefully handle SIGINT signals
+    process.on('SIGINT', this._onSigIntFactory())
+  }
+
   async _start () {
     try {
-      var server = new Server(this._argv)
-      await server.start()
-
-      // Gracefully handle SIGINT signals
-      process.on('SIGINT', async () => {
-        log.info('Stopping as received SIGNINT')
-        await server.stop()
-      })
+      await this._server.start()
     } catch (err) {
-      try {
-        await server.stop()
-      } catch (err) {
-        log.error('failed to stop')
-      }
-      log.fatal(err)
+      await this._onFatalError(err)
     }
   }
 
   async run (argv) {
-    this._usage(argv)
     await this._start()
   }
 }

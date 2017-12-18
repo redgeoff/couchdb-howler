@@ -8,8 +8,12 @@ class Utils {
     this.password = 'secret'
   }
 
-  getServerURL () {
-    return config.server.scheme + '://' + config.server.host + ':' + config.server.port
+  getServer1URL () {
+    return config.server1.scheme + '://' + config.server1.host + ':' + config.server1.port
+  }
+
+  getServer2URL () {
+    return config.server2.scheme + '://' + config.server2.host + ':' + config.server2.port
   }
 
   getCouchDBURL () {
@@ -34,16 +38,26 @@ class Utils {
     await this.slouch.user.destroy(this.username)
   }
 
-  async shouldThrow (promiseFactory, errName) {
-    let err = null
+  async shouldThrow (promiseFactory, errName, errMessage, err) {
+    let e = null
 
     try {
       await promiseFactory()
     } catch (_err) {
-      err = _err
+      e = _err
     }
 
-    err.name.should.eql(errName)
+    if (errName) {
+      e.name.should.eql(errName)
+    }
+
+    if (errMessage) {
+      e.message.should.eql(errMessage)
+    }
+
+    if (err) {
+      e.should.eql(err)
+    }
   }
 
   // TODO: move to sporks

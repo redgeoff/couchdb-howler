@@ -5,10 +5,10 @@ import commonUtils from '../utils'
 import sporks from 'sporks'
 
 class Client extends events.EventEmitter {
-  constructor (url) {
+  constructor (url, session) {
     super()
     this._url = url
-    this._session = new Session()
+    this._session = session || new Session()
 
     // A list of the DB names for which we are already subscribed
     this._subscribedToDBs = {}
@@ -47,7 +47,7 @@ class Client extends events.EventEmitter {
   async _onceResponse (eventName) {
     let response = await sporks.once(this._socket, eventName)
     if (commonUtils.isError(response[0])) {
-      throw commonUtils.toError(response[0])
+      throw commonUtils.responseToError(response[0])
     } else {
       return response[0]
     }
@@ -121,7 +121,7 @@ class Client extends events.EventEmitter {
 
   async _connectAndEmitIfError (username, password, cookie) {
     try {
-      this._connect(username, password, cookie)
+      await this._connect(username, password, cookie)
     } catch (err) {
       this._emitError(err)
     }
@@ -143,13 +143,18 @@ class Client extends events.EventEmitter {
       const ack = obj => {
         this._throwIfError(obj, resolve, reject)
       }
-      this._socket.emit(eventName, args, ack)
+      if (!this._connected) {
+        reject(new Error('not connected'))
+      } else {
+        this._socket.emit(eventName, args, ack)
+      }
     })
   }
 
   async logIn (username, password, cookie) {
     let r = await this._connect(username, password, cookie)
     await this._session.set(r.cookie)
+    return r
   }
 
   async logOut () {

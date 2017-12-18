@@ -3,6 +3,7 @@ import log from './log'
 import Sockets from './sockets'
 import utils from './utils'
 import Slouch from 'couch-slouch'
+import commonUtils from '../utils'
 
 class Server {
   constructor (opts) {
@@ -11,6 +12,7 @@ class Server {
     this._sockets = new Sockets()
     this._slouch = new Slouch(opts['couchdb-url'])
     this._iterator = null
+    this._started = false
   }
 
   async _logInOrVerifyLogin (socket, params) {
@@ -53,7 +55,7 @@ class Server {
       this._onAuthenticated(socket)
     } catch (err) {
       this._sockets.log(socket, 'authentication failure=' + JSON.stringify(err))
-      socket.emit('not-authenticated', err)
+      socket.emit('not-authenticated', commonUtils.errorToResponse(err))
     }
   }
 
@@ -142,18 +144,22 @@ class Server {
     this._io.listen(this._port)
 
     this._listenToGlobalChanges()
+
+    this._started = true
   }
 
   stop () {
-    // Stop accepting connections
-    this._io.close()
+    if (this._started) {
+      // Stop accepting connections
+      this._io.close()
 
-    // Close each socket connection
-    this._sockets.close()
+      // Close each socket connection
+      this._sockets.close()
 
-    if (this._iterator) {
       this._iterator.abort()
     }
+
+    this._started = false
   }
 }
 

@@ -1,3 +1,5 @@
+import commonUtils from '../utils'
+
 class Utils {
   _success (callback, obj) {
     callback(obj || {})
@@ -5,17 +7,13 @@ class Utils {
 
   _failure (callback, err) {
     // For some reason the linter requires obj to be defined before it is used with callback()
-    let obj = {
-      error: true,
-      errorName: err.name,
-      errorMessage: err.message
-    }
+    let obj = commonUtils.errorToResponse(err)
     callback(obj)
   }
 
   async respond (callback, promiseFactory) {
     try {
-      let r = promiseFactory ? await promiseFactory() : {}
+      let r = await promiseFactory()
       this._success(callback, r)
     } catch (err) {
       this._failure(callback, err)
