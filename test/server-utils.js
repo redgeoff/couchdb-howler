@@ -40,6 +40,17 @@ class Utils {
     await spawner.kill(this._server2)
   }
 
+  async createTestServer3 () {
+    this._server3 = new Server({
+      port: config.server3.port,
+      'couchdb-url': testUtils.getCouchDBURL()
+    })
+  }
+
+  async destroyTestServer3 () {
+    await this._server3.stop()
+  }
+
   async createTestServers () {
     await this.createTestServer1()
     await this.createTestServer2()

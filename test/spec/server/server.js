@@ -1,5 +1,6 @@
 import Client from '../../../src/client/client'
 import testUtils from '../../utils'
+import serverUtils from '../../server-utils'
 import sporks from 'sporks'
 
 describe('server', function () {
@@ -46,5 +47,10 @@ describe('server', function () {
     change[0].should.eql('test_db')
 
     await client.logOut()
+  })
+
+  it('should stop when not already started', async () => {
+    await serverUtils.createTestServer3()
+    await serverUtils.destroyTestServer3()
   })
 })
