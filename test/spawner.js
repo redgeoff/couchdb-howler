@@ -1,22 +1,16 @@
-// TODO: move to sporks
-
 import sporks from 'sporks'
 import childProcess from 'child_process'
 
 const spawn = childProcess.spawn
 
+// TODO: move to sporks
 class Spawner {
-  run (command, opts, ignoreErrors) {
+  run (command, opts, printOutput) {
     let child = spawn(command, opts)
 
-    const onData = logEntry => {
-      // Uncomment for extra debugging
-      //
-      // console.log('logEntry=', logEntry, '\n')
-
-      // An error entry? There shouldn't be any errors
-      if (!ignoreErrors) {
-        console.error(logEntry + '')
+    const onData = data => {
+      if (printOutput) {
+        console.log(data + '')
       }
     }
 
