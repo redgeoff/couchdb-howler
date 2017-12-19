@@ -34,6 +34,10 @@ You can use Docker Swarm to run a cluster of howler servers. For example, you ca
       -e --port='3000' \
       redgeoff/couchdb-howler
 
+Note: to check the version with Docker you'll need to use `version=true`, e.g.
+
+    $ docker run -it -e version=true redgeoff/couchdb-howler
+
 ### Using howler in a client
 
 Let's assume that you are running the howler server on port 3000 at howler.example.com and that you have a user in the CouchDB `_users` database with username `myuser` and password `mypwd`. The howler client must use a user account to connect to the howler server, however howler does not require the user to have any particular roles.
@@ -82,3 +86,5 @@ Examples:
 ## [Testing](TESTING.md)
 
 ## [Compiling](COMPILING.md)
+
+## [Building](BUILDING.md)
