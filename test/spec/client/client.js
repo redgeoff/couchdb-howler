@@ -155,7 +155,25 @@ describe('client', function () {
     await test()
   })
 
-  // TODO: test subscribe, unsubscribe and _subscribedToDBs
+  it('should modify _subscribedToDBs when subscribing and unsubscribing', async () => {
+    await client.subscribe('db1')
+    await client.subscribe('db2')
+    await client.subscribe('db3')
+    await client.subscribe('db4')
+    client._subscribedToDBs.should.eql({
+      db1: true,
+      db2: true,
+      db3: true,
+      db4: true
+    })
+
+    await client.unsubscribe('db2')
+    await client.unsubscribe('db3')
+    client._subscribedToDBs.should.eql({
+      db1: true,
+      db4: true
+    })
+  })
 
   // TODO: make sure to test that in browser stored cookie is retrieved
 })
