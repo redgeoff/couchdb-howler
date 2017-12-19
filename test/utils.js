@@ -58,6 +58,8 @@ class Utils {
     if (err) {
       e.should.eql(err)
     }
+
+    this.shouldNotEqual(e, null)
   }
 
   // TODO: move to sporks

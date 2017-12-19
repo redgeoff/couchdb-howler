@@ -20,7 +20,10 @@ class Server {
 
     if (params.cookie) {
       // A cookie was supplied so verify that it is valid
-      response = await this._slouch.user.authenticated(params.cookie)
+      await this._slouch.user.authenticated(params.cookie)
+      response = {
+        cookie: params.cookie
+      }
     } else {
       // Use the username and password to authenticate
       response = await this._slouch.user.authenticate(params.username, params.password)

@@ -14,6 +14,7 @@ class Client extends events.EventEmitter {
     this._subscribedToDBs = {}
 
     this._connected = false
+    this._ready = false
 
     this._connectIfCookie()
   }
@@ -71,20 +72,24 @@ class Client extends events.EventEmitter {
     this._socket.on('disconnect', () => {
       this.emit('disconnect')
       this._connected = false
+      this._ready = false
     })
   }
 
   async _onConnect () {
     let authenticated = await this._waitForAuthenticationResponse()
 
-    // We just connected so resubscribe
-    await this._resubscribe()
+    this.emit('connect')
+    this._connected = true
 
     this._onChange()
     this._onDisconnect()
 
-    this.emit('connect')
-    this._connected = true
+    // We just connected so resubscribe
+    await this._resubscribe()
+
+    this.emit('ready')
+    this._ready = true
 
     return authenticated
   }
@@ -143,7 +148,7 @@ class Client extends events.EventEmitter {
       const ack = obj => {
         this._throwIfError(obj, resolve, reject)
       }
-      if (!this._connected) {
+      if (!this.isConnected()) {
         reject(new Error('not connected'))
       } else {
         this._socket.emit(eventName, args, ack)
@@ -157,21 +162,26 @@ class Client extends events.EventEmitter {
     return r
   }
 
-  async logOut () {
+  async _emitLogOut () {
     await this._emit('log-out')
+  }
+
+  async logOut () {
+    // We clear the session first as we want the session cleared even if the log out fails
     await this._session.clear()
+    await this._emitLogOut()
   }
 
   async subscribe (dbName) {
-    if (this._connected) {
-      await this._emit('subscribe', [dbName])
+    if (this.isConnected()) {
+      await this._emitSubscribe([dbName])
     }
     this._subscribedToDBs[dbName] = true
   }
 
   async unsubscribe (dbName) {
-    if (this._connected) {
-      await this._emit('unsubscribe', [dbName])
+    if (this.isConnected()) {
+      await this._emitUnsubscribe([dbName])
     }
     delete this._subscribedToDBs[dbName]
   }
@@ -180,6 +190,10 @@ class Client extends events.EventEmitter {
     if (this._socket) {
       this._socket.disconnect()
     }
+  }
+
+  isConnected () {
+    return this._connected
   }
 }
 
