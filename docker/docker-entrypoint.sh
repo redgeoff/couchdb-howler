@@ -27,8 +27,6 @@ if [ "$1" = '/usr/local/bin/couchdb-howler' ]; then
 
   done
 
-  echo "cmdParams="$cmdParams
-
   $@ $cmdParams
 
 else
