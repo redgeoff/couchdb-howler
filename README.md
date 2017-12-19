@@ -68,3 +68,5 @@ You can log in with `client.logIn()` at any time, but you will not receive chang
 ## [Testing](TESTING.md)
 
 ## [Compiling](COMPILING.md)
+
+## [Building](BUILDING.md)
