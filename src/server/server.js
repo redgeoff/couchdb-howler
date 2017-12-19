@@ -10,8 +10,8 @@ class Server {
     this._port = opts.port
     this._io = socketIO()
     this._sockets = new Sockets()
-    this._slouch = new Slouch(opts['couchdb-url'])
-    log.level(utils.getOpt(opts, 'log-level', 'info'))
+    this._slouch = new Slouch(opts['couchdb_url'])
+    log.level(utils.getOpt(opts, 'log_level', 'info'))
     this._iterator = null
     this._started = false
   }
