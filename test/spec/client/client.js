@@ -13,7 +13,17 @@ describe('client', function () {
     client = new Client(testUtils.getServer1URL())
   })
 
-  afterEach(() => {
+  const logOutAndIgnoreError = async () => {
+    try {
+      await client.logOut()
+    } catch (err) {
+      // Ignore error. This can occur as we may already have logged out or in there was an
+      // (intentional) error when logging in
+    }
+  }
+
+  afterEach(async () => {
+    await logOutAndIgnoreError()
     client.stop()
   })
 
@@ -31,8 +41,6 @@ describe('client', function () {
     let cookie = await client._session.get()
     testUtils.shouldNotEqual(cookie, undefined)
     cookie.should.eql(response.cookie)
-
-    await client.logOut()
   })
 
   it('should throw when log in fails', async () => {
@@ -51,6 +59,14 @@ describe('client', function () {
     )
   })
 
+  it('log out should clear cookies even if log out fails', async () => {
+    await client.logIn(testUtils.username, testUtils.password)
+    await client.logOut()
+
+    let cookie = await client._session.get()
+    testUtils.shouldEqual(cookie, undefined)
+  })
+
   it('should log in with stored cookie', async () => {
     let cookie = await genCookie()
 
@@ -63,8 +79,6 @@ describe('client', function () {
     sinon.spy(client, '_connect')
     await sporks.waitFor(() => (client._connected ? true : undefined))
     testUtils.shouldEqual(client._connect.exceptions[0], undefined)
-
-    await client.logOut()
   })
 
   it('should fail to log in with stored cookie', async () => {

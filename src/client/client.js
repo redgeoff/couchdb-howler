@@ -148,7 +148,7 @@ class Client extends events.EventEmitter {
       const ack = obj => {
         this._throwIfError(obj, resolve, reject)
       }
-      if (!this._connected) {
+      if (!this.isConnected()) {
         reject(new Error('not connected'))
       } else {
         this._socket.emit(eventName, args, ack)
@@ -163,19 +163,20 @@ class Client extends events.EventEmitter {
   }
 
   async logOut () {
-    await this._emit('log-out')
+    // We clear the session first as we want the session cleared even if the log out fails
     await this._session.clear()
+    await this._emit('log-out')
   }
 
   async subscribe (dbName) {
-    if (this._connected) {
+    if (this.isConnected()) {
       await this._emitSubscribe([dbName])
     }
     this._subscribedToDBs[dbName] = true
   }
 
   async unsubscribe (dbName) {
-    if (this._connected) {
+    if (this.isConnected()) {
       await this._emitUnsubscribe([dbName])
     }
     delete this._subscribedToDBs[dbName]
@@ -185,6 +186,10 @@ class Client extends events.EventEmitter {
     if (this._socket) {
       this._socket.disconnect()
     }
+  }
+
+  isConnected () {
+    return this._connected
   }
 }
 
