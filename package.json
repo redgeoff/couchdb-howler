@@ -1,6 +1,6 @@
 {
   "name": "couchdb-howler",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Use web sockets to subscribe to CouchDB global changes",
   "main": "index.js",
   "bin": {
