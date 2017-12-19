@@ -26,12 +26,22 @@ Note: the system database `_global_changes` must exist. If it doesn't, create it
 
 You can use Docker Swarm to run a cluster of howler servers. For example, you can run 2 server instances with:
 
+    $ docker network create \
+        --driver overlay \
+        --subnet 10.0.9.0/24 \
+        --opt encrypted \
+        howler-network
+
+and then:
+
     $ docker service create \
       --name howler-server \
       --detach=true \
       --replicas 2 \
+      --network=howler-network \
       -e --couchdb_url='https://admin:secret@example.com' \
       -e --port='3000' \
+      -p 3000:3000 \
       redgeoff/couchdb-howler
 
 Note: to check the version with Docker you'll need to use `version=true`, e.g.
