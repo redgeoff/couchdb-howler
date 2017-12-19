@@ -1,6 +1,10 @@
 import commonUtils from '../utils'
 
 class Utils {
+  getOpt (opts, name, def) {
+    return opts && opts[name] !== undefined ? opts[name] : def
+  }
+
   _success (callback, obj) {
     callback(obj || {})
   }

@@ -23,6 +23,17 @@ class Command {
       .describe('p', 'Port')
       .default('p', 3000)
 
+      .alias('l', 'log-level')
+      .nargs('l', 1)
+      .describe(
+        'l',
+        [
+          'error|warn|info|debug. Setting a particular level implies that all log records at that',
+          'level and above are logged.'
+        ].join(' ')
+      )
+      .default('l', 'info')
+
       .help('h')
       .alias('h', 'help')
 
