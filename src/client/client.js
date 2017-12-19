@@ -162,10 +162,14 @@ class Client extends events.EventEmitter {
     return r
   }
 
+  async _emitLogOut () {
+    await this._emit('log-out')
+  }
+
   async logOut () {
     // We clear the session first as we want the session cleared even if the log out fails
     await this._session.clear()
-    await this._emit('log-out')
+    await this._emitLogOut()
   }
 
   async subscribe (dbName) {

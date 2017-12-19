@@ -3,7 +3,7 @@ import testUtils from '../utils'
 import sporks from 'sporks'
 
 describe('integration', function () {
-  this.timeout(35000)
+  this.timeout(25000)
 
   let client = null
 

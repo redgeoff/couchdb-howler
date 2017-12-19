@@ -5,7 +5,7 @@ import sporks from 'sporks'
 import Session from '../../../src/client/session'
 
 describe('client', function () {
-  this.timeout(35000)
+  this.timeout(25000)
 
   let client = null
 
@@ -60,8 +60,11 @@ describe('client', function () {
   })
 
   it('log out should clear cookies even if log out fails', async () => {
+    sinon.stub(client, '_emitLogOut').throws()
     await client.logIn(testUtils.username, testUtils.password)
-    await client.logOut()
+    await testUtils.shouldThrow(async () => {
+      await client.logOut()
+    })
 
     let cookie = await client._session.get()
     testUtils.shouldEqual(cookie, undefined)
