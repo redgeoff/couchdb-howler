@@ -40,3 +40,6 @@ test:
   override:
     - nvm use $NODE_VERSION && npm run node-full-test
     - nvm use $NODE_VERSION && npm run browser-test-phantomjs
+
+    # Sanity test docker image
+    - docker run -it -e version=true redgeoff/couchdb-howler
