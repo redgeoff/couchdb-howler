@@ -1,5 +1,8 @@
-'use strict';
+'use strict'
 
-import lib from './lib';
+// NOTE: this file must be ES5
 
-module.exports = lib;
+require('babel-polyfill')
+var lib = require('./lib')
+
+module.exports = lib
