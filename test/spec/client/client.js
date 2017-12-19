@@ -95,7 +95,39 @@ describe('client', function () {
     cookie.should.eql(response.cookie)
   })
 
-  // TODO: test what happens when try to subscribe and haven't logged in
+  it('should subscribe when not already logged in', async () => {
+    await client.subscribe('my-db')
+  })
+
+  it('should buffer subscriptions until log in', async () => {
+    sinon.spy(client, '_emitSubscribe')
+    await client.subscribe('db1')
+    await client.subscribe('db2')
+    client._emitSubscribe.notCalled.should.eql(true)
+
+    let ready = sporks.once(client, 'ready')
+    await client.logIn(testUtils.username, testUtils.password)
+    await ready
+    client._emitSubscribe.calledOnce.should.eql(true)
+    client._emitSubscribe.getCall(0).args[0].should.eql(['db1', 'db2'])
+  })
+
+  it('should resubscribe when reconnecting', async () => {
+    sinon.spy(client, '_emitSubscribe')
+    await client.logIn(testUtils.username, testUtils.password)
+    await client.subscribe('db1')
+    await client.subscribe('db2')
+    client._emitSubscribe.calledTwice.should.eql(true)
+    client._emitSubscribe.getCall(0).args[0].should.eql(['db1'])
+    client._emitSubscribe.getCall(1).args[0].should.eql(['db2'])
+    await client.logOut()
+
+    let ready = sporks.once(client, 'ready')
+    await client.logIn(testUtils.username, testUtils.password)
+    await ready
+    client._emitSubscribe.calledThrice.should.eql(true)
+    client._emitSubscribe.getCall(2).args[0].should.eql(['db1', 'db2'])
+  })
 
   it('should log in, subscribe, unsubscribe, log out and repeat', async () => {
     const test = async () => {
@@ -108,6 +140,8 @@ describe('client', function () {
     await test()
     await test()
   })
+
+  // TODO: test subscribe, unsubscribe and _subscribedToDBs
 
   // TODO: make sure to test that in browser stored cookie is retrieved
 })

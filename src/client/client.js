@@ -14,6 +14,7 @@ class Client extends events.EventEmitter {
     this._subscribedToDBs = {}
 
     this._connected = false
+    this._ready = false
 
     this._connectIfCookie()
   }
@@ -71,20 +72,24 @@ class Client extends events.EventEmitter {
     this._socket.on('disconnect', () => {
       this.emit('disconnect')
       this._connected = false
+      this._ready = false
     })
   }
 
   async _onConnect () {
     let authenticated = await this._waitForAuthenticationResponse()
 
-    // We just connected so resubscribe
-    await this._resubscribe()
+    this.emit('connect')
+    this._connected = true
 
     this._onChange()
     this._onDisconnect()
 
-    this.emit('connect')
-    this._connected = true
+    // We just connected so resubscribe
+    await this._resubscribe()
+
+    this.emit('ready')
+    this._ready = true
 
     return authenticated
   }
@@ -164,14 +169,14 @@ class Client extends events.EventEmitter {
 
   async subscribe (dbName) {
     if (this._connected) {
-      await this._emit('subscribe', [dbName])
+      await this._emitSubscribe([dbName])
     }
     this._subscribedToDBs[dbName] = true
   }
 
   async unsubscribe (dbName) {
     if (this._connected) {
-      await this._emit('unsubscribe', [dbName])
+      await this._emitUnsubscribe([dbName])
     }
     delete this._subscribedToDBs[dbName]
   }
