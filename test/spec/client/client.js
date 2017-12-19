@@ -5,7 +5,7 @@ import sporks from 'sporks'
 import Session from '../../../src/client/session'
 
 describe('client', function () {
-  this.timeout(15000)
+  this.timeout(25000)
 
   let client = null
 
