@@ -38,7 +38,7 @@ You can use Docker Swarm to run a cluster of howler servers. For example, you ca
 
 Let's assume that you are running the howler server on port 3000 at howler.example.com and that you have a user in the CouchDB `_users` database with username `myuser` and password `mypwd`. The howler client must use a user account to connect to the howler server, however howler does not require the user to have any particular roles.
 
-Here's what you client code may look like:
+Here's what your client code may look like:
 
 ```js
 import Client from 'couchdb-howler'
