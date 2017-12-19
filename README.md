@@ -61,6 +61,24 @@ await client.logIn('myuser', 'mypwd')
 
 You can log in with `client.logIn()` at any time, but you will not receive changes until you do. Upon logging in, howler will automatically create a session cookie named `couchdb-howler-session`. After logging in, subsequent use of the howler client will automatically use this cached cookie until you issue `client.logOut()`. This cookie authentication allows you to only have to authenticate with a username and password once per session--typically when a user logs in via your login form. This session cookie is also used to automatically re-authenticate in the event that the howler client reconnects to the server after a transient error like a dropped network connection.
 
+## Server Usage
+
+```
+Usage: server.js [options]
+
+Options:
+  -p, --port         Port                                        [default: 3000]
+  -l, --log-level    error|warn|info|debug. Setting a particular level implies
+                     that all log records at that level and above are logged.
+                                                               [default: "info"]
+  -h, --help         Show help                                         [boolean]
+  -u, --couchdb-url  URL to the CouchDB cluster                       [required]
+  -v, --version      Show version number                               [boolean]
+
+Examples:
+  server.js --couchdb-url https://admin:admin@localhost:5984 --port 3000
+```
+
 ## [Testing](TESTING.md)
 
 ## [Compiling](COMPILING.md)
