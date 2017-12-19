@@ -37,7 +37,9 @@ class Command {
       .help('h')
       .alias('h', 'help')
 
-      .version('v')
+      // Note: yargs version functionality disabled or else it causes problems
+      // .version('v')
+      .describe('v', 'Show version number')
       .alias('v', 'version')
 
       .demandOption(['couchdb-url'])
