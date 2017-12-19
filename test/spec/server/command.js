@@ -10,7 +10,7 @@ describe('command', () => {
     command = new Command([
       '--port',
       config.server3.port,
-      '--couchdb-url',
+      '--couchdb_url',
       testUtils.getCouchDBURL()
     ])
   })

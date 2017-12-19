@@ -18,7 +18,7 @@ Install howler:
 
 Let's assume that your CouchDB instance is accessible via port 443 via HTTPS at db.example.com and that you have an admin user with username `admin` and password `secret`. Let's also assume that we want to run the server on port 3000.
 
-    $ couchdb-howler --couchdb-url https://admin:secret@example.com --port 3000
+    $ couchdb-howler --couchdb_url https://admin:secret@example.com --port 3000
 
 Note: the system database `_global_changes` must exist. If it doesn't, create it.
 
@@ -30,7 +30,7 @@ You can use Docker Swarm to run a cluster of howler servers. For example, you ca
       --name howler-server \
       --detach=true \
       --replicas 2 \
-      -e --couchdb-url='https://admin:secret@example.com' \
+      -e --couchdb_url='https://admin:secret@example.com' \
       -e --port='3000' \
       redgeoff/couchdb-howler
 
@@ -68,15 +68,15 @@ Usage: server.js [options]
 
 Options:
   -p, --port         Port                                        [default: 3000]
-  -l, --log-level    error|warn|info|debug. Setting a particular level implies
+  -l, --log_level    error|warn|info|debug. Setting a particular level implies
                      that all log records at that level and above are logged.
                                                                [default: "info"]
   -h, --help         Show help                                         [boolean]
-  -u, --couchdb-url  URL to the CouchDB cluster                       [required]
+  -u, --couchdb_url  URL to the CouchDB cluster                       [required]
   -v, --version      Show version number                               [boolean]
 
 Examples:
-  server.js --couchdb-url https://admin:admin@localhost:5984 --port 3000
+  server.js --couchdb_url https://admin:admin@localhost:5984 --port 3000
 ```
 
 ## [Testing](TESTING.md)

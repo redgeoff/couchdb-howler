@@ -12,18 +12,18 @@ class Command {
     this._argv = yargs(argv)
       .usage('Usage: $0 [options]')
 
-      .example('$0 --couchdb-url https://admin:admin@localhost:5984 --port 3000')
+      .example('$0 --couchdb_url https://admin:admin@localhost:5984 --port 3000')
 
-      .alias('u', 'couchdb-url')
-      .nargs('couchdb-url', 1)
-      .describe('couchdb-url', 'URL to the CouchDB cluster')
+      .alias('u', 'couchdb_url')
+      .nargs('couchdb_url', 1)
+      .describe('couchdb_url', 'URL to the CouchDB cluster')
 
       .alias('p', 'port')
       .nargs('p', 1)
       .describe('p', 'Port')
       .default('p', 3000)
 
-      .alias('l', 'log-level')
+      .alias('l', 'log_level')
       .nargs('l', 1)
       .describe(
         'l',
@@ -42,7 +42,7 @@ class Command {
       .describe('v', 'Show version number')
       .alias('v', 'version')
 
-      .demandOption(['couchdb-url'])
+      .demandOption(['couchdb_url'])
 
       .epilog('Copyright 2017').argv
   }

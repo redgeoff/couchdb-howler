@@ -9,8 +9,8 @@ class Utils {
   async createTestServer1 () {
     this._server1 = new Server({
       port: config.server1.port,
-      'couchdb-url': testUtils.getCouchDBURL(),
-      'log-level': 'warn'
+      'couchdb_url': testUtils.getCouchDBURL(),
+      'log_level': 'warn'
     })
     await this._server1.start()
   }
@@ -32,9 +32,9 @@ class Utils {
     this._server2 = spawner.run(path.join(this.rootPath(), 'bin/server.js'), [
       '--port',
       config.server2.port,
-      '--couchdb-url',
+      '--couchdb_url',
       testUtils.getCouchDBURL(),
-      '--log-level',
+      '--log_level',
       'warn'
     ])
   }
@@ -46,7 +46,7 @@ class Utils {
   async createTestServer3 () {
     this._server3 = new Server({
       port: config.server3.port,
-      'couchdb-url': testUtils.getCouchDBURL()
+      'couchdb_url': testUtils.getCouchDBURL()
     })
   }
 
