@@ -24,6 +24,11 @@ class Utils {
       .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k]))
       .join('&')
   }
+
+  // TODO: move to sporks
+  inBrowser () {
+    return !!global.window
+  }
 }
 
 module.exports = new Utils()

@@ -174,6 +174,4 @@ describe('client', function () {
       db4: true
     })
   })
-
-  // TODO: make sure to test that in browser stored cookie is retrieved
 })
