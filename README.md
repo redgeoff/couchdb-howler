@@ -80,6 +80,8 @@ await client.logIn('myuser', 'mypwd')
 
 You can log in with `client.logIn()` at any time, but you will not receive changes until you do. Upon logging in, howler will automatically create a session cookie named `couchdb-howler-session`. After logging in, subsequent use of the howler client will automatically use this cached cookie until you issue `client.logOut()`. This cookie authentication allows you to only have to authenticate with a username and password once per session--typically when a user logs in via your login form. This session cookie is also used to automatically re-authenticate in the event that the howler client reconnects to the server after a transient error like a dropped network connection.
 
+The subscriptions persist through reconnects. In the event that the client does reconnect, it will automatically re-subscribe to the DBs for which is was subscribed before losing the connection. If you subscribe to any DBs while the client is not connected to the server, the client will automatically send the subscriptions to the server when a connection is established.
+
 ## Server Usage
 
 ```
