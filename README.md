@@ -35,7 +35,7 @@ You can use Docker Swarm to run a cluster of howler servers. For example, you ca
 and then:
 
     $ docker service create \
-      --name howler-server \
+      --name howler \
       --detach=true \
       --replicas 2 \
       --network=howler-network \
@@ -47,6 +47,11 @@ and then:
 Note: to check the version with Docker you'll need to use `version=true`, e.g.
 
     $ docker run -it -e version=true redgeoff/couchdb-howler
+    
+Upgrade to latest image:
+
+    $ docker pull redgeoff/couchdb-howler
+    $ docker service update --detach=true --image redgeoff/couchdb-howler howler
 
 ### Using howler in a client
 
