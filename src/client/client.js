@@ -160,21 +160,18 @@ class Client extends events.EventEmitter {
     }
   }
 
-  _throwIfError (obj, resolve, reject) {
-    if (obj.error) {
-      // TODO: use commonUtils.toError
-      let err = new Error(obj.errorMessage)
-      err.name = obj.errorName
-      reject(err)
+  _throwIfError (response, resolve, reject) {
+    if (commonUtils.isError(response)) {
+      reject(commonUtils.responseToError(response))
     } else {
-      resolve(obj)
+      resolve(response)
     }
   }
 
   _emit (eventName, args) {
     return new Promise((resolve, reject) => {
-      const ack = obj => {
-        this._throwIfError(obj, resolve, reject)
+      const ack = response => {
+        this._throwIfError(response, resolve, reject)
       }
       if (!this.isConnected()) {
         reject(new Error('not connected'))
