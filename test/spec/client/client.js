@@ -155,7 +155,7 @@ describe('client', function () {
     let ready = sporks.once(client, 'ready')
 
     // Simulate the server going down and then back up
-    client._socket.emit('connect')
+    client._onAuthenticatedFactory()()
 
     await ready
     client._emitSubscribe.calledThrice.should.eql(true)

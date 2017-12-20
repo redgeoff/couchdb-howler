@@ -117,11 +117,17 @@ class Client extends events.EventEmitter {
     return commonUtils._toQueryString(params)
   }
 
-  async _listenForConnect () {
-    // A 'connect' event can be fired when the server goes down and then comes back
-    this._socket.on('connect', async () => {
+  _onAuthenticatedFactory () {
+    return () => {
       this._onConnect()
-    })
+    }
+  }
+
+  async _listenForAuthenticated () {
+    // An 'authenticated' event can be fired when the server goes down and then comes back. We need
+    // to listen for the 'authenticated' event and not the 'connected' event because the
+    // 'authenticated' event is fired when the server is ready for requests
+    this._socket.on('authenticated', this._onAuthenticatedFactory())
   }
 
   _onNotAuthenticatedFactory () {
@@ -143,12 +149,15 @@ class Client extends events.EventEmitter {
 
     await sporks.once(this._socket, 'connect')
 
-    this._listenForConnect()
     this._listenForChange()
     this._listenForDisconnect()
 
-    // Is there a bug in babel? Why is `return r` required here?
     let r = await this._authenticate()
+
+    // We listen for the authenticated event after we have authenticated as we only want to listen
+    // for authentications that occur when there is a reconnect
+    this._listenForAuthenticated()
+
     return r
   }
 
