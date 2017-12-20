@@ -85,6 +85,10 @@ class Client extends events.EventEmitter {
 
     this._ready = true
     this.emit('ready')
+
+    // We listen after ready as we don't want to double report errors as logIn() will already throw
+    // an error
+    this._listenForNotAuthenticated()
   }
 
   async _authenticate () {
@@ -120,12 +124,16 @@ class Client extends events.EventEmitter {
     })
   }
 
+  _onNotAuthenticatedFactory () {
+    return response => {
+      this._emitError(commonUtils.responseToError(response))
+    }
+  }
+
   async _listenForNotAuthenticated () {
     // A 'not-authenticated' event can be fired when the server goes down, comes back and the
     // session has expired
-    this._socket.on('not-authenticated', async response => {
-      this._emitError(commonUtils.responseToError(response))
-    })
+    this._socket.on('not-authenticated', this._onNotAuthenticatedFactory())
   }
 
   async _connect (username, password, cookie) {

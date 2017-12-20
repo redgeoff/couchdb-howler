@@ -60,6 +60,7 @@ class Server {
     } catch (err) {
       this._sockets.log(socket, 'authentication failure=' + JSON.stringify(err))
       socket.emit('not-authenticated', commonUtils.errorToResponse(err))
+      this._disconnect(socket)
     }
   }
 
@@ -80,6 +81,12 @@ class Server {
     })
   }
 
+  _disconnect (socket) {
+    // Close the socket as we do not want a connection if it is not authorized. This will
+    // automatically trigger the disconnect event that will remove the socket from sockets
+    socket.disconnect()
+  }
+
   _listenForLogOut (socket) {
     // We cannot use _addSocketListener as we need to respond before issuing the disconnect
     socket.on('log-out', (params, callback) => {
@@ -88,9 +95,7 @@ class Server {
       let obj = {}
       callback(obj)
 
-      // Close the socket as we do not want a connection if it is not authorized. This will
-      // automatically trigger the disconnect event that will remove the socket from sockets
-      socket.disconnect()
+      this._disconnect(socket)
     })
   }
 

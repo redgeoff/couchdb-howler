@@ -155,11 +155,31 @@ describe('client', function () {
     let ready = sporks.once(client, 'ready')
 
     // Simulate the server going down and then back up
-    client._onConnect()
+    client._socket.emit('connect')
 
     await ready
     client._emitSubscribe.calledThrice.should.eql(true)
     client._emitSubscribe.getCall(2).args[0].should.eql(['db1', 'db2'])
+  })
+
+  it('should handle not-authenticated event when reconnecting', async () => {
+    // This scenario can happen when the server goes down, a cookie expires and then the server
+    // comes back online
+
+    sinon.spy(client, '_emitError')
+    await client.logIn(testUtils.username, testUtils.password)
+
+    let error = sporks.once(client, 'error')
+
+    // Simulate receiving a not-authenticated event
+    client._onNotAuthenticatedFactory()({
+      error: true,
+      errorName: 'NotAuthenticatedError'
+    })
+
+    await error
+
+    client._emitError.getCall(0).args[0].name.should.eql('NotAuthenticatedError')
   })
 
   it('should log in, subscribe, unsubscribe, log out and repeat', async () => {
