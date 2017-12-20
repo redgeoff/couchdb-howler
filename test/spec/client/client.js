@@ -146,19 +146,21 @@ describe('client', function () {
     client._emitSubscribe.getCall(2).args[0].should.eql(['db1', 'db2'])
   })
 
-  // it('should resubscribe when reconnecting', async () => {
-  //   sinon.spy(client, '_emitSubscribe')
-  //   await client.logIn(testUtils.username, testUtils.password)
-  //
-  //   // Simulate the server going down and then back up
-  //   client._socket.emit('')
-  //
-  //   let ready = sporks.once(client, 'ready')
-  //   await client.logIn(testUtils.username, testUtils.password)
-  //   await ready
-  //   client._emitSubscribe.calledThrice.should.eql(true)
-  //   client._emitSubscribe.getCall(2).args[0].should.eql(['db1', 'db2'])
-  // })
+  it('should resubscribe when reconnecting', async () => {
+    sinon.spy(client, '_emitSubscribe')
+    await client.logIn(testUtils.username, testUtils.password)
+    await client.subscribe('db1')
+    await client.subscribe('db2')
+
+    let ready = sporks.once(client, 'ready')
+
+    // Simulate the server going down and then back up
+    client._onConnect()
+
+    await ready
+    client._emitSubscribe.calledThrice.should.eql(true)
+    client._emitSubscribe.getCall(2).args[0].should.eql(['db1', 'db2'])
+  })
 
   it('should log in, subscribe, unsubscribe, log out and repeat', async () => {
     const test = async () => {
