@@ -9,8 +9,8 @@ class Utils {
   async createTestServer1 () {
     this._server1 = new Server({
       port: config.server1.port,
-      'couchdb_url': testUtils.getCouchDBURL(),
-      'log_level': 'warn'
+      couchdb_url: testUtils.getCouchDBURL(),
+      log_level: 'warn'
     })
     await this._server1.start()
   }
@@ -46,7 +46,7 @@ class Utils {
   async createTestServer3 () {
     this._server3 = new Server({
       port: config.server3.port,
-      'couchdb_url': testUtils.getCouchDBURL()
+      couchdb_url: testUtils.getCouchDBURL()
     })
   }
 

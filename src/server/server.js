@@ -39,10 +39,10 @@ class Server {
   }
 
   _onAuthenticated (socket) {
-    this._onLogOut(socket)
-    this._onSubscribe(socket)
-    this._onUnsubscribe(socket)
-    this._onDisconnect(socket)
+    this._listenForLogOut(socket)
+    this._listenForSubscribe(socket)
+    this._listenForUnsubscribe(socket)
+    this._listenForDisconnect(socket)
   }
 
   async _authenticate (socket) {
@@ -60,10 +60,11 @@ class Server {
     } catch (err) {
       this._sockets.log(socket, 'authentication failure=' + JSON.stringify(err))
       socket.emit('not-authenticated', commonUtils.errorToResponse(err))
+      this._disconnect(socket)
     }
   }
 
-  _onConnection () {
+  _listenForConnection () {
     // We handle the authentication during the connection so that it is slightly harder for a DDOS
     // attack to exhaust our connection pool
     this._io.on('connection', async socket => {
@@ -80,7 +81,13 @@ class Server {
     })
   }
 
-  _onLogOut (socket) {
+  _disconnect (socket) {
+    // Close the socket as we do not want a connection if it is not authorized. This will
+    // automatically trigger the disconnect event that will remove the socket from sockets
+    socket.disconnect()
+  }
+
+  _listenForLogOut (socket) {
     // We cannot use _addSocketListener as we need to respond before issuing the disconnect
     socket.on('log-out', (params, callback) => {
       this._sockets.log(socket, 'logout, disconnecting...')
@@ -88,13 +95,11 @@ class Server {
       let obj = {}
       callback(obj)
 
-      // Close the socket as we do not want a connection if it is not authorized. This will
-      // automatically trigger the disconnect event that will remove the socket from sockets
-      socket.disconnect()
+      this._disconnect(socket)
     })
   }
 
-  _onSubscribe (socket) {
+  _listenForSubscribe (socket) {
     this._addSocketListener({
       socket: socket,
       eventName: 'subscribe',
@@ -105,7 +110,7 @@ class Server {
     })
   }
 
-  _onUnsubscribe (socket) {
+  _listenForUnsubscribe (socket) {
     this._addSocketListener({
       socket: socket,
       eventName: 'unsubscribe',
@@ -116,7 +121,7 @@ class Server {
     })
   }
 
-  _onDisconnect (socket) {
+  _listenForDisconnect (socket) {
     // The disconnect event is different than others so we don't use _addSocketListener
     socket.on('disconnect', () => {
       this._sockets.log(socket, 'disconnect')
@@ -142,7 +147,7 @@ class Server {
   }
 
   start () {
-    this._onConnection()
+    this._listenForConnection()
 
     log.info('Listening on port', this._port)
     this._io.listen(this._port)

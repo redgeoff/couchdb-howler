@@ -62,13 +62,13 @@ class Client extends events.EventEmitter {
     return auth
   }
 
-  _onChange () {
+  _listenForChange () {
     this._socket.on('change', dbName => {
       this.emit('change', dbName)
     })
   }
 
-  _onDisconnect () {
+  _listenForDisconnect () {
     this._socket.on('disconnect', () => {
       this.emit('disconnect')
       this._connected = false
@@ -77,19 +77,24 @@ class Client extends events.EventEmitter {
   }
 
   async _onConnect () {
-    let authenticated = await this._waitForAuthenticationResponse()
-
-    this.emit('connect')
     this._connected = true
-
-    this._onChange()
-    this._onDisconnect()
+    this.emit('connect')
 
     // We just connected so resubscribe
     await this._resubscribe()
 
-    this.emit('ready')
     this._ready = true
+    this.emit('ready')
+
+    // We listen after ready as we don't want to double report errors as logIn() will already throw
+    // an error
+    this._listenForNotAuthenticated()
+  }
+
+  async _authenticate () {
+    let authenticated = await this._waitForAuthenticationResponse()
+
+    await this._onConnect()
 
     return authenticated
   }
@@ -112,6 +117,25 @@ class Client extends events.EventEmitter {
     return commonUtils._toQueryString(params)
   }
 
+  async _listenForConnect () {
+    // A 'connect' event can be fired when the server goes down and then comes back
+    this._socket.on('connect', async () => {
+      this._onConnect()
+    })
+  }
+
+  _onNotAuthenticatedFactory () {
+    return response => {
+      this._emitError(commonUtils.responseToError(response))
+    }
+  }
+
+  async _listenForNotAuthenticated () {
+    // A 'not-authenticated' event can be fired when the server goes down, comes back and the
+    // session has expired
+    this._socket.on('not-authenticated', this._onNotAuthenticatedFactory())
+  }
+
   async _connect (username, password, cookie) {
     let qs = this._toQueryString(username, password, cookie)
 
@@ -119,8 +143,12 @@ class Client extends events.EventEmitter {
 
     await sporks.once(this._socket, 'connect')
 
+    this._listenForConnect()
+    this._listenForChange()
+    this._listenForDisconnect()
+
     // Is there a bug in babel? Why is `return r` required here?
-    let r = await this._onConnect()
+    let r = await this._authenticate()
     return r
   }
 
