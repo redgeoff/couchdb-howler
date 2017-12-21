@@ -24,25 +24,48 @@ Note: the system database `_global_changes` must exist. If it doesn't, create it
 
 ### Running the server with Docker Swarm
 
-You can use Docker Swarm to run a cluster of howler servers. For example, you can run 2 server instances with:
+You can use Docker Swarm to run a cluster of howler servers. For example, you can run 2 server instances at howler.example.com on port 3000 with the following:
 
-    $ docker network create \
-        --driver overlay \
-        --subnet 10.0.9.0/24 \
-        --opt encrypted \
-        howler-network
-
-and then:
-
-    $ docker service create \
-      --name howler \
-      --detach=true \
-      --replicas 2 \
-      --network=howler-network \
-      -e --couchdb_url='https://admin:secret@example.com' \
-      -e --port='3000' \
-      -p 3000:3000 \
-      redgeoff/couchdb-howler
+1. Create the network:
+```
+$ docker network create \
+    --driver overlay \
+    --subnet 10.0.9.0/24 \
+    --opt encrypted \
+    howler-network
+```
+2. Create a [traefik](https://traefik.io) service as sticky sessions are needed for the web sockets:
+```
+$ docker service create \
+    --name traefik \
+    --detach=true \
+    --constraint=node.role==manager \
+    --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+    --network=howler-network \
+    -p 3000:80 \
+    -p 8080:8080 \
+    traefik \
+  --docker \
+  --docker.swarmmode \
+  --docker.domain="example.com" \
+  --docker.watch \
+  --loglevel=DEBUG \
+  --web
+```
+3. Create the howler service:
+```
+$ docker service create \
+  --name howler \
+  --detach=true \
+  --replicas 2 \
+  --network=howler-network \
+  --label traefik.frontend.rule="Host:howler.exmaple.com" \
+  --label traefik.port=80 \
+  --label traefik.backend.loadbalancer.sticky=true \
+  -e --couchdb_url='https://admin:secret@example.com' \
+  -e --port=80 \
+  redgeoff/couchdb-howler
+```
 
 Note: to check the version with Docker you'll need to use `version=true`, e.g.
 
