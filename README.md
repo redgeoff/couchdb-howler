@@ -8,7 +8,7 @@ Use web sockets to subscribe to CouchDB global changes
 
 Howler enables your clients to listen for changes to different databases with a single web socket connection. Howler is very scalable as each howler server instance maintains only a single continuous connection with your CouchDB cluster. Each howler server instance is equal and therefore more capacity can be added just by adding a new server instance. Many howler clients can connect to a single howler server. The howler server only notifies a howler client when there is a change to the DBs for which the client has subscribed--this keeps web traffic to a minimum and is a major improvement over having each client listen directly to the `_global_changes` feed.
 
-The applications for howler are vast, but in particular, howler is useful for when you have different PouchDB instances and want only to replicate when a DB has been updated.
+The applications for howler are vast, but in particular, howler is useful for when you have different PouchDB instances and want only to replicate when a DB has been updated. This is particularly relevant when you have multiple PouchDB instances listening for changes and need to avoid exhausting the limited DB and browser connections that would otherwise be needed to maintain continous replications.
 
 ### Running the server with Node.js
 
