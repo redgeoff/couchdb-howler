@@ -9,7 +9,7 @@ describe('command', () => {
   beforeEach(() => {
     command = new Command([
       '--port',
-      config.server3.port,
+      config.server3.port + '',
       '--couchdb_url',
       testUtils.getCouchDBURL()
     ])
