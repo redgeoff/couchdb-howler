@@ -4,7 +4,8 @@ MAINTAINER Geoff Cox redgeoff@gmail.com
 
 WORKDIR /usr/src/app
 
-RUN npm install -g couchdb-howler
+# --unsafe is required for leveldown to install properly
+RUN npm install -g couchdb-howler --unsafe
 
 EXPOSE 3000
 
