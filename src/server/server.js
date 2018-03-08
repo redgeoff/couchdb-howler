@@ -134,8 +134,8 @@ class Server {
     this._addSocketListener({
       socket: socket,
       eventName: 'heartbeat',
-      promiseFactory: async (/* socket */) => {
-        // this._sockets.log(socket, 'heartbeat')
+      promiseFactory: async socket => {
+        this._sockets.log(socket, 'heartbeat')
         return { ok: true }
       }
     })
