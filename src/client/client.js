@@ -5,10 +5,11 @@ import commonUtils from '../utils'
 import sporks from 'sporks'
 
 class Client extends events.EventEmitter {
-  constructor (url, session) {
+  constructor (url, session, heartbeatMilliseconds) {
     super()
     this._url = url
     this._session = session || new Session()
+    this._heartbeatMilliseconds = heartbeatMilliseconds || 30000
 
     // A list of the DB names for which we are already subscribed
     this._subscribedToDBs = {}
@@ -218,6 +219,10 @@ class Client extends events.EventEmitter {
       await this._emitUnsubscribe([dbName])
     }
     delete this._subscribedToDBs[dbName]
+  }
+
+  async beat () {
+    return this._emit('heartbeat')
   }
 
   stop () {

@@ -213,4 +213,10 @@ describe('client', function () {
       db4: true
     })
   })
+
+  it('should send heartbeat', async () => {
+    await client.logIn(testUtils.username, testUtils.password)
+    const response = await client.beat()
+    response.should.eql({ ok: true })
+  })
 })
