@@ -43,6 +43,7 @@ class Server {
     this._listenForSubscribe(socket)
     this._listenForUnsubscribe(socket)
     this._listenForDisconnect(socket)
+    this._listenForHeartbeat(socket)
   }
 
   async _authenticate (socket) {
@@ -76,7 +77,7 @@ class Server {
   _addSocketListener (opts) {
     opts.socket.on(opts.eventName, async (params, callback) => {
       await utils.respond(callback, async () => {
-        await opts.promiseFactory(opts.socket, params)
+        return opts.promiseFactory(opts.socket, params)
       })
     })
   }
@@ -126,6 +127,17 @@ class Server {
     socket.on('disconnect', () => {
       this._sockets.log(socket, 'disconnect')
       this._sockets.remove(socket)
+    })
+  }
+
+  _listenForHeartbeat (socket) {
+    this._addSocketListener({
+      socket: socket,
+      eventName: 'heartbeat',
+      promiseFactory: async socket => {
+        this._sockets.log(socket, 'heartbeat')
+        return { ok: true }
+      }
     })
   }
 

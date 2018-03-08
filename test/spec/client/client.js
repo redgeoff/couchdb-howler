@@ -213,4 +213,23 @@ describe('client', function () {
       db4: true
     })
   })
+
+  it('should send heartbeat', async () => {
+    // Make the heartbeat more frequent for testing
+    client._heartbeatMilliseconds = 100
+
+    sinon.spy(client, '_beat')
+
+    await client.logIn(testUtils.username, testUtils.password)
+
+    await sporks.waitFor(() => {
+      return client._beat.callCount >= 3 ? true : undefined
+    })
+
+    // Make sure we got a response from the server
+    const value1 = await client._beat.getCall(0).returnValue
+    const value2 = await client._beat.getCall(1).returnValue
+    value1.ok.should.equal(true)
+    value2.ok.should.equal(true)
+  })
 })

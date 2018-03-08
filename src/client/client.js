@@ -5,10 +5,11 @@ import commonUtils from '../utils'
 import sporks from 'sporks'
 
 class Client extends events.EventEmitter {
-  constructor (url, session) {
+  constructor (url, session, heartbeatMilliseconds) {
     super()
     this._url = url
     this._session = session || new Session()
+    this._heartbeatMilliseconds = heartbeatMilliseconds || 30000
 
     // A list of the DB names for which we are already subscribed
     this._subscribedToDBs = {}
@@ -73,6 +74,7 @@ class Client extends events.EventEmitter {
       this.emit('disconnect')
       this._connected = false
       this._ready = false
+      this._stopHeartbeatCheckerIfRunning()
     })
   }
 
@@ -89,6 +91,8 @@ class Client extends events.EventEmitter {
     // We listen after ready as we don't want to double report errors as logIn() will already throw
     // an error
     this._listenForNotAuthenticated()
+
+    this._startHeartbeatChecker()
   }
 
   async _authenticate () {
@@ -218,6 +222,29 @@ class Client extends events.EventEmitter {
       await this._emitUnsubscribe([dbName])
     }
     delete this._subscribedToDBs[dbName]
+  }
+
+  async _beat () {
+    return this._emit('heartbeat')
+  }
+
+  _stopHeartbeatCheckerIfRunning () {
+    if (this._heartbeatChecker) {
+      clearInterval(this._heartbeatChecker)
+      this._heartbeatChecker = null
+    }
+  }
+
+  // Hybrid apps (witnessed on at least iOS) that are not used for a few minutes often do something
+  // funky with the web sockets and leave them in an unresponsive state. We'll force a reconnect by
+  // sending a heartbeat periodically.
+  _startHeartbeatChecker () {
+    // Stop any currently running heartbeat checker
+    this._stopHeartbeatCheckerIfRunning()
+
+    this._heartbeatChecker = setInterval(() => {
+      this._beat()
+    }, this._heartbeatMilliseconds)
   }
 
   stop () {
