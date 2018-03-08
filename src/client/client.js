@@ -75,6 +75,14 @@ class Client extends events.EventEmitter {
       this._connected = false
       this._ready = false
       this._stopHeartbeatCheckerIfRunning()
+
+      // Reconnect?
+      if (!this._stopped) {
+        // The socket may disconnect for unexpected reasons, e.g. a hybrid app is not used for
+        // several minutes. Unfortunately, socket.io doesn't reconnect in these cases so we'll
+        // do the reconnect.
+        this._connectIfCookie()
+      }
     })
   }
 
@@ -248,6 +256,8 @@ class Client extends events.EventEmitter {
   }
 
   stop () {
+    this._stopped = true
+
     if (this._socket) {
       this._socket.disconnect()
     }
