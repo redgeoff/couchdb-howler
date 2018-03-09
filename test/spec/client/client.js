@@ -197,6 +197,7 @@ describe('client', function () {
     sinon.spy(client, '_emitError')
     sinon.stub(client, '_connect').throws()
     client.stopped = true
+    await client._connectAndEmitIfError()
     client._emitError.notCalled.should.eql(true)
   })
 
