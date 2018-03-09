@@ -260,7 +260,7 @@ class Client extends events.EventEmitter {
   }
 
   async _disconnectSocket () {
-    const disconnected = sporks.once(this._socket, 'disconnect');
+    const disconnected = sporks.once(this._socket, 'disconnect')
 
     this._socket.disconnect()
 
