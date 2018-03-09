@@ -2,7 +2,6 @@ version: 2
 
 jobs:
   build:
-    machine: true
     docker:
       - image: circleci/node:8.9.4-stretch-browsers
     steps:
@@ -16,6 +15,8 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
+
+      - setup_remote_docker
 
       # Install CouchDB 2
       - run: docker run -d --name couchdb -p 15984:5984 -e COUCHDB_USER='admin' -e COUCHDB_PASSWORD='admin' redgeoff/couchdb
