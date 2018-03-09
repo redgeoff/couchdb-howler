@@ -4,7 +4,11 @@ jobs:
   build:
     docker:
       - image: circleci/node:8.9.4-stretch-browsers
-    steps:
+      - image: redgeoff/couchdb
+        environment:
+        - COUCHDB_USER: admin
+        - COUCHDB_PASSWORD: admin
+=    steps:
       - checkout
       - restore_cache:
           keys:
@@ -19,20 +23,19 @@ jobs:
       - setup_remote_docker
 
       # Install CouchDB 2
-      - run: docker run -d --net=host --name couchdb -p 15984:5984 -e COUCHDB_USER='admin' -e COUCHDB_PASSWORD='admin' redgeoff/couchdb
       # Wait for DB to be ready
       - run: sleep 15
       # Create system DBs
-      - run: curl -X PUT http://admin:admin@localhost:15984/_users
-      - run: curl -X PUT http://admin:admin@localhost:15984/_replicator
-      - run: curl -X PUT http://admin:admin@localhost:15984/_global_changes
+      - run: curl -X PUT http://admin:admin@localhost:5984/_users
+      - run: curl -X PUT http://admin:admin@localhost:5984/_replicator
+      - run: curl -X PUT http://admin:admin@localhost:5984/_global_changes
 
       # Enable CORS
       - run: npm install -g add-cors-to-couchdb
-      - run: add-cors-to-couchdb http://localhost:15984 -u admin -p admin
+      - run: add-cors-to-couchdb http://localhost:5984 -u admin -p admin
 
       # Change port so that it doesn't interfer with CircleCI running a CouchDB instance on port 5984
-      - run: sed -i "s/5984/15984/g" test/config.js
+      # - run: sed -i "s/5984/15984/g" test/config.js
 
       - run: npm run assert-compiled
       - run: npm run lint
