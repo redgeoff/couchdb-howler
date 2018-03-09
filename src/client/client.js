@@ -69,20 +69,28 @@ class Client extends events.EventEmitter {
     })
   }
 
+  _disconnect () {
+    if (this._connected && !this._disconnectingSocket) {
+      this._disconnectSocket()
+    }
+
+    this.emit('disconnect')
+    this._connected = false
+    this._ready = false
+    this._stopHeartbeatCheckerIfRunning()
+
+    // Reconnect?
+    if (!this._stopped) {
+      // The socket may disconnect for unexpected reasons, e.g. a hybrid app is not used for
+      // several minutes. Unfortunately, socket.io doesn't reconnect in these cases so we'll
+      // do the reconnect.
+      this._connectIfCookie()
+    }
+  }
+
   _listenForDisconnect () {
     this._socket.on('disconnect', () => {
-      this.emit('disconnect')
-      this._connected = false
-      this._ready = false
-      this._stopHeartbeatCheckerIfRunning()
-
-      // Reconnect?
-      if (!this._stopped) {
-        // The socket may disconnect for unexpected reasons, e.g. a hybrid app is not used for
-        // several minutes. Unfortunately, socket.io doesn't reconnect in these cases so we'll
-        // do the reconnect.
-        this._connectIfCookie()
-      }
+      this._disconnect()
     })
   }
 
@@ -170,6 +178,11 @@ class Client extends events.EventEmitter {
     // for authentications that occur when there is a reconnect
     this._listenForAuthenticated()
 
+    // Did we just stop before we even finished connecting? Then disconnect
+    if (this._stopped) {
+      this._disconnect()
+    }
+
     return r
   }
 
@@ -177,7 +190,11 @@ class Client extends events.EventEmitter {
     try {
       await this._connect(username, password, cookie)
     } catch (err) {
-      this._emitError(err)
+      // Ignore any errors when we have already stopped. This can happen when there are race
+      // conditions when stopping
+      if (!this._stopped) {
+        this._emitError(err)
+      }
     }
   }
 
@@ -233,7 +250,9 @@ class Client extends events.EventEmitter {
   }
 
   async _beat () {
-    return this._emit('heartbeat')
+    const response = await this._emit('heartbeat')
+    this._lastHeartbeatAt = new Date()
+    return response
   }
 
   _stopHeartbeatCheckerIfRunning () {
@@ -250,16 +269,50 @@ class Client extends events.EventEmitter {
     // Stop any currently running heartbeat checker
     this._stopHeartbeatCheckerIfRunning()
 
+    // Initialize the _lastHeartbeatAt to now
+    this._lastHeartbeatAt = new Date()
+
     this._heartbeatChecker = setInterval(() => {
+      // _beat() is async and we purposely don't await here as we want the following expiration
+      // logic to run even if the heartbeat hangs or errors out
       this._beat()
+
+      // Has it been too long since we received the last heartbeat ack? It can take up
+      // heartbeatMilliseconds*2 in between checks as this check is done without waiting for the
+      // response from beat()--meaning that we can be one heartbeat behind.
+      if (
+        new Date().getTime() - this._lastHeartbeatAt.getTime() >
+        this._heartbeatMilliseconds * 2
+      ) {
+        // Force reconnect as the connection has probably hung. This can occur in
+        // a hybrid app when the app is resumed after some inactivity.
+        this._disconnect()
+      }
     }, this._heartbeatMilliseconds)
   }
 
-  stop () {
-    this._stopped = true
+  async _disconnectSocket () {
+    this._disconnectingSocket = true
 
     if (this._socket) {
+      const disconnected = this._connected
+        ? sporks.once(this._socket, 'disconnect')
+        : Promise.resolve()
+
       this._socket.disconnect()
+
+      return disconnected
+    }
+  }
+
+  async stop () {
+    this._stopped = true
+    this._stopHeartbeatCheckerIfRunning()
+
+    // Is there a connection? This check is important as otherwise a race condition can lead to us
+    // closing a connection that has already been closed
+    if (this._connected && !this._disconnectingSocket) {
+      await this._disconnectSocket()
     }
   }
 
