@@ -1,0 +1,41 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/node:8.9.4-stretch-browsers
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-dependencies-
+      - run: npm install
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+
+      # Install CouchDB 2
+      - run: docker run -d --name couchdb -p 15984:5984 -e COUCHDB_USER='admin' -e COUCHDB_PASSWORD='admin' redgeoff/couchdb
+      # Wait for DB to be ready
+      - sleep 15
+      # Create system DBs
+      - run: curl -X PUT http://admin:admin@localhost:15984/_users
+      - run: curl -X PUT http://admin:admin@localhost:15984/_replicator
+      - run: curl -X PUT http://admin:admin@localhost:15984/_global_changes
+
+      # Enable CORS
+      - npm install -g add-cors-to-couchdb
+      - add-cors-to-couchdb http://localhost:15984 -u admin -p admin
+
+      # Change port so that it doesn't interfer with CircleCI running a CouchDB instance on port 5984
+      - sed -i "s/5984/15984/g" test/config.js
+
+      - run: npm run assert-compiled
+      - run: npm run lint
+      - run: npm run node-full-test
+      - run: npm run browser-test
+
+      # Sanity test docker image
+      - run: docker run -it -e version=true redgeoff/couchdb-howler
