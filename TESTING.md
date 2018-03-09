@@ -36,22 +36,18 @@ e.g. http://127.0.0.1:8001/browser/index.html?grep=reg-ex
 
 ## Automated browser tests
 
-phantomjs:
-
-    $ npm run browser-test-phantomjs
-
-You can also filter the tests, e.g.
-
-    $ npm run browser-test-phantomjs -- -g 'some reg-ex'
-
-Chrome:
+Headless testing in Chrome:
 
 Note: you must have Chrome installed
 
-    $ npm run browser-test-phantomjs -- -b selenium:chrome
+    $ npm run browser-test
+
+You can also filter the tests, e.g.
+
+    $ npm run browser-test -- -g 'some reg-ex'
 
 Firefox:
 
 Note: you must have Firefox installed
 
-    $ npm run browser-test-phantomjs -- -b selenium:firefox
+    $ npm run browser-test -- -b selenium:firefox
