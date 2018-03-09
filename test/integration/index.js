@@ -21,7 +21,7 @@ describe('integration', function () {
   })
 
   afterEach(async () => {
-    client.stop()
+    await client.stop()
     await destroyTestDB()
   })
 

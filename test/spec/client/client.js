@@ -22,17 +22,27 @@ describe('client', function () {
     }
   }
 
-  afterEach(async () => {
+  const stopClient = async () => {
     await logOutAndIgnoreError()
-    client.stop()
+    await client.stop()
+  }
+
+  afterEach(async () => {
+    await stopClient()
   })
 
   const genCookie = async () => {
-    await client.logIn(testUtils.username, testUtils.password)
-    let cookie = await client._session.get()
-    await client.logOut()
+    // Create another client, client2, so that we don't change anything in our test client
+    const client2 = new Client(testUtils.getServer1URL())
+    await client2.logIn(testUtils.username, testUtils.password)
+    let cookie = await client2._session.get()
+    await client2.stop()
     return cookie
   }
+
+  it('should stop before connecting', async () => {
+    await stopClient()
+  })
 
   it('should log in and log out', async () => {
     let response = await client.logIn(testUtils.username, testUtils.password)
