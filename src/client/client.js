@@ -177,7 +177,11 @@ class Client extends events.EventEmitter {
     try {
       await this._connect(username, password, cookie)
     } catch (err) {
-      this._emitError(err)
+      // Ignore any errors when we have already stopped. This can happen when there are race
+      // conditions when stopping
+      if (!this._stopped) {
+        this._emitError(err)
+      }
     }
   }
 
@@ -255,11 +259,22 @@ class Client extends events.EventEmitter {
     }, this._heartbeatMilliseconds)
   }
 
-  stop () {
-    this._stopped = true
+  async _disconnectSocket () {
+    const disconnected = sporks.once(this._socket, 'disconnect')
 
-    if (this._socket) {
-      this._socket.disconnect()
+    this._socket.disconnect()
+
+    return disconnected
+  }
+
+  async stop () {
+    this._stopped = true
+    this._stopHeartbeatCheckerIfRunning()
+
+    // Is there a connection? This check is important as otherwise a race condition can lead to us
+    // closing a connection that has already been closed
+    if (this._connected) {
+      await this._disconnectSocket()
     }
   }
 

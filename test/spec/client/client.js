@@ -22,17 +22,27 @@ describe('client', function () {
     }
   }
 
-  afterEach(async () => {
+  const stopClient = async () => {
     await logOutAndIgnoreError()
-    client.stop()
+    await client.stop()
+  }
+
+  afterEach(async () => {
+    await stopClient()
   })
 
   const genCookie = async () => {
-    await client.logIn(testUtils.username, testUtils.password)
-    let cookie = await client._session.get()
-    await client.logOut()
+    // Create another client, client2, so that we don't change anything in our test client
+    const client2 = new Client(testUtils.getServer1URL())
+    await client2.logIn(testUtils.username, testUtils.password)
+    let cookie = await client2._session.get()
+    await client2.stop()
     return cookie
   }
+
+  it('should stop before connecting', async () => {
+    await stopClient()
+  })
 
   it('should log in and log out', async () => {
     let response = await client.logIn(testUtils.username, testUtils.password)
@@ -180,6 +190,15 @@ describe('client', function () {
     await error
 
     client._emitError.getCall(0).args[0].name.should.eql('NotAuthenticatedError')
+  })
+
+  it('should not emit error when stopping', async () => {
+    // This can happen when there are race conditions with stopping and connecting/re-connecting
+    sinon.spy(client, '_emitError')
+    sinon.stub(client, '_connect').throws()
+    client._stopped = true
+    await client._connectAndEmitIfError()
+    client._emitError.notCalled.should.eql(true)
   })
 
   it('should log in, subscribe, unsubscribe, log out and repeat', async () => {
