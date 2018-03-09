@@ -192,6 +192,14 @@ describe('client', function () {
     client._emitError.getCall(0).args[0].name.should.eql('NotAuthenticatedError')
   })
 
+  it('should not emit error when stopping', async () => {
+    // This can happen when there are race conditions with stopping and connecting/re-connecting
+    sinon.spy(client, '_emitError')
+    sinon.stub(client, '_connect').throws()
+    client.stopped = true
+    client._emitError.notCalled.should.eql(true)
+  })
+
   it('should log in, subscribe, unsubscribe, log out and repeat', async () => {
     const test = async () => {
       await client.logIn(testUtils.username, testUtils.password)
