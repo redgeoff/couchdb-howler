@@ -196,7 +196,7 @@ describe('client', function () {
     // This can happen when there are race conditions with stopping and connecting/re-connecting
     sinon.spy(client, '_emitError')
     sinon.stub(client, '_connect').throws()
-    client.stopped = true
+    client._stopped = true
     await client._connectAndEmitIfError()
     client._emitError.notCalled.should.eql(true)
   })
