@@ -3,6 +3,7 @@ import io from 'socket.io-client'
 import Session from './session'
 import commonUtils from '../utils'
 import sporks from 'sporks'
+import Backoff from 'backoff-promise'
 
 class Client extends events.EventEmitter {
   constructor (url, session, heartbeatMilliseconds) {
@@ -17,6 +18,8 @@ class Client extends events.EventEmitter {
     this._connected = false
     this._ready = false
 
+    this._backoff = new Backoff()
+
     this._connectIfCookie()
   }
 
@@ -24,7 +27,7 @@ class Client extends events.EventEmitter {
     // Already logged in? Use the cookie to authenticate
     let cookie = await this._session.get()
     if (cookie) {
-      this._connectAndEmitIfError(null, null, cookie)
+      this._connectAndEmitIfErrorWithRetry(null, null, cookie)
     }
   }
 
@@ -185,8 +188,18 @@ class Client extends events.EventEmitter {
       // conditions when stopping
       if (!this._stopped) {
         this._emitError(err)
+
+        // Throw the error so that the connect can be retried
+        throw err
       }
     }
+  }
+
+  async _connectAndEmitIfErrorWithRetry (username, password, cookie) {
+    // Retry the connect with an exponential backoff if there is an error
+    return this._backoff.run(() => {
+      return this._connectAndEmitIfError(username, password, cookie)
+    })
   }
 
   _throwIfError (response, resolve, reject) {
