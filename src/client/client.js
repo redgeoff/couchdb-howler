@@ -241,7 +241,12 @@ class Client extends events.EventEmitter {
   }
 
   async _beat () {
-    return this._emit('heartbeat')
+    const response = await this._emit('heartbeat')
+
+    // Update the timestamp after the heartbeat response
+    this._lastHeartbeatAt = new Date()
+
+    return response
   }
 
   _stopHeartbeatCheckerIfRunning () {

@@ -275,4 +275,11 @@ describe('client', function () {
     client._disconnectSocketIfConnected.calledOnce.should.eql(true)
     client._disconnect.calledOnce.should.eql(true)
   })
+
+  it('should update timestamp after heartbeat', async () => {
+    testUtils.shouldEqual(client._lastHeartbeatAt, undefined)
+    sinon.stub(client, '_emit')
+    await client._beat()
+    testUtils.shouldNotEqual(client._lastHeartbeatAt, undefined)
+  })
 })
