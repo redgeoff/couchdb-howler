@@ -261,4 +261,18 @@ describe('client', function () {
     await client._disconnectSocketIfNotDisconnecting()
     client._disconnectSocket.calledOnce.should.eql(true)
   })
+
+  it('should reconnect if too long since heartbeat', () => {
+    sinon.stub(client, '_disconnectSocketIfConnected')
+    sinon.stub(client, '_disconnect')
+
+    // Mock a date in the past
+    client._lastHeartbeatAt = new Date(new Date().getTime() - 10000)
+
+    client._heartbeatMilliseconds = 1
+
+    client._reconnectIfTooLongSinceHeartbeat()
+    client._disconnectSocketIfConnected.calledOnce.should.eql(true)
+    client._disconnect.calledOnce.should.eql(true)
+  })
 })

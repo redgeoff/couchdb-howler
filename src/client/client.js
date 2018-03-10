@@ -251,12 +251,30 @@ class Client extends events.EventEmitter {
     }
   }
 
-  _reconnect () {
+  async _disconnectSocketIfConnected () {
     if (this._connected) {
-      // We purposely don't await here in case the disconnect hangs
-      this._disconnectSocketIfNotDisconnecting()
+      await this._disconnectSocketIfNotDisconnecting()
     }
+  }
+
+  _reconnect () {
+    // We purposely don't await here in case the disconnect hangs
+    this._disconnectSocketIfConnected()
+
     this._disconnect()
+  }
+
+  _reconnectIfTooLongSinceHeartbeat () {
+    // Has it been too long since we received the last heartbeat ack? It can take up
+    // heartbeatMilliseconds*2 in between checks as this check is done without waiting for the
+    // response from beat()--meaning that we can be one heartbeat behind. We don't want the
+    // expirationMs to be too low or else we'll never reconnect--e.g. during testing
+    let expirationMs = Math.max(this._heartbeatMilliseconds * 2, 5000)
+    if (new Date().getTime() - this._lastHeartbeatAt.getTime() > expirationMs) {
+      // Force reconnect as the connection has probably hung. This can occur in
+      // a hybrid app when the app is resumed after some inactivity.
+      this._reconnect()
+    }
   }
 
   // Hybrid apps (witnessed on at least iOS) that are not used for a few minutes often do something
@@ -274,16 +292,7 @@ class Client extends events.EventEmitter {
       // logic to run even if the heartbeat hangs or errors out
       this._beat()
 
-      // Has it been too long since we received the last heartbeat ack? It can take up
-      // heartbeatMilliseconds*2 in between checks as this check is done without waiting for the
-      // response from beat()--meaning that we can be one heartbeat behind. We don't want the
-      // expirationMs to be too low or else we'll never reconnect--e.g. during testing
-      let expirationMs = Math.max(this._heartbeatMilliseconds * 2, 5000)
-      if (new Date().getTime() - this._lastHeartbeatAt.getTime() > expirationMs) {
-        // Force reconnect as the connection has probably hung. This can occur in
-        // a hybrid app when the app is resumed after some inactivity.
-        this._reconnect()
-      }
+      this._reconnectIfTooLongSinceHeartbeat()
     }, this._heartbeatMilliseconds)
   }
 
@@ -311,9 +320,7 @@ class Client extends events.EventEmitter {
 
     // Is there a connection? This check is important as otherwise a race condition can lead to us
     // closing a connection that has already been closed
-    if (this._connected) {
-      await this._disconnectSocketIfNotDisconnecting()
-    }
+    this._disconnectSocketIfConnected()
   }
 
   isConnected () {
