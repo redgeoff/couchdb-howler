@@ -69,20 +69,24 @@ class Client extends events.EventEmitter {
     })
   }
 
+  _disconnect () {
+    this.emit('disconnect')
+    this._connected = false
+    this._ready = false
+    this._stopHeartbeatCheckerIfRunning()
+
+    // Reconnect?
+    if (!this._stopped) {
+      // The socket may disconnect for unexpected reasons, e.g. a hybrid app is not used for
+      // several minutes. Unfortunately, socket.io doesn't reconnect in these cases so we'll
+      // do the reconnect.
+      this._connectIfCookie()
+    }
+  }
+
   _listenForDisconnect () {
     this._socket.on('disconnect', () => {
-      this.emit('disconnect')
-      this._connected = false
-      this._ready = false
-      this._stopHeartbeatCheckerIfRunning()
-
-      // Reconnect?
-      if (!this._stopped) {
-        // The socket may disconnect for unexpected reasons, e.g. a hybrid app is not used for
-        // several minutes. Unfortunately, socket.io doesn't reconnect in these cases so we'll
-        // do the reconnect.
-        this._connectIfCookie()
-      }
+      this._disconnect()
     })
   }
 
@@ -247,6 +251,32 @@ class Client extends events.EventEmitter {
     }
   }
 
+  async _disconnectSocketIfConnected () {
+    if (this._connected) {
+      await this._disconnectSocketIfNotDisconnecting()
+    }
+  }
+
+  _reconnect () {
+    // We purposely don't await here in case the disconnect hangs
+    this._disconnectSocketIfConnected()
+
+    this._disconnect()
+  }
+
+  _reconnectIfTooLongSinceHeartbeat () {
+    // Has it been too long since we received the last heartbeat ack? It can take up
+    // heartbeatMilliseconds*2 in between checks as this check is done without waiting for the
+    // response from beat()--meaning that we can be one heartbeat behind. We don't want the
+    // expirationMs to be too low or else we'll never reconnect--e.g. during testing
+    let expirationMs = Math.max(this._heartbeatMilliseconds * 2, 5000)
+    if (new Date().getTime() - this._lastHeartbeatAt.getTime() > expirationMs) {
+      // Force reconnect as the connection has probably hung. This can occur in
+      // a hybrid app when the app is resumed after some inactivity.
+      this._reconnect()
+    }
+  }
+
   // Hybrid apps (witnessed on at least iOS) that are not used for a few minutes often do something
   // funky with the web sockets and leave them in an unresponsive state. We'll force a reconnect by
   // sending a heartbeat periodically.
@@ -254,8 +284,15 @@ class Client extends events.EventEmitter {
     // Stop any currently running heartbeat checker
     this._stopHeartbeatCheckerIfRunning()
 
+    // Initialize the _lastHeartbeatAt to now
+    this._lastHeartbeatAt = new Date()
+
     this._heartbeatChecker = setInterval(() => {
+      // _beat() is async and we purposely don't await here as we want the following expiration
+      // logic to run even if the heartbeat hangs or errors out
       this._beat()
+
+      this._reconnectIfTooLongSinceHeartbeat()
     }, this._heartbeatMilliseconds)
   }
 
@@ -267,15 +304,23 @@ class Client extends events.EventEmitter {
     return disconnected
   }
 
+  async _disconnectSocketIfNotDisconnecting () {
+    if (!this._disconnectingSocket) {
+      // Prevent race conditions when closing the socket simulatenously by setting a flag before the
+      // async operation
+      this._disconnectingSocket = true
+
+      await this._disconnectSocket()
+    }
+  }
+
   async stop () {
     this._stopped = true
     this._stopHeartbeatCheckerIfRunning()
 
     // Is there a connection? This check is important as otherwise a race condition can lead to us
     // closing a connection that has already been closed
-    if (this._connected) {
-      await this._disconnectSocket()
-    }
+    this._disconnectSocketIfConnected()
   }
 
   isConnected () {
