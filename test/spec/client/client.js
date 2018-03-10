@@ -251,4 +251,14 @@ describe('client', function () {
     value1.ok.should.equal(true)
     value2.ok.should.equal(true)
   })
+
+  it('should handle race on socket disconnect', async () => {
+    sinon.stub(client, '_disconnectSocket')
+    await client._disconnectSocketIfNotDisconnecting()
+    client._disconnectSocket.calledOnce.should.eql(true)
+
+    // We are already disconnecting so _disconnectSocket should not be called
+    await client._disconnectSocketIfNotDisconnecting()
+    client._disconnectSocket.calledOnce.should.eql(true)
+  })
 })

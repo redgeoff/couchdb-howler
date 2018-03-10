@@ -254,7 +254,7 @@ class Client extends events.EventEmitter {
   _reconnect () {
     if (this._connected) {
       // We purposely don't await here in case the disconnect hangs
-      this._disconnectSocket()
+      this._disconnectSocketIfNotDisconnecting()
     }
     this._disconnect()
   }
@@ -288,16 +288,20 @@ class Client extends events.EventEmitter {
   }
 
   async _disconnectSocket () {
+    const disconnected = sporks.once(this._socket, 'disconnect')
+
+    this._socket.disconnect()
+
+    return disconnected
+  }
+
+  async _disconnectSocketIfNotDisconnecting () {
     if (!this._disconnectingSocket) {
       // Prevent race conditions when closing the socket simulatenously by setting a flag before the
       // async operation
       this._disconnectingSocket = true
 
-      const disconnected = sporks.once(this._socket, 'disconnect')
-
-      this._socket.disconnect()
-
-      return disconnected
+      await this._disconnectSocket()
     }
   }
 
@@ -308,7 +312,7 @@ class Client extends events.EventEmitter {
     // Is there a connection? This check is important as otherwise a race condition can lead to us
     // closing a connection that has already been closed
     if (this._connected) {
-      await this._disconnectSocket()
+      await this._disconnectSocketIfNotDisconnecting()
     }
   }
 
