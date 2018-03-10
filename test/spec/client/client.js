@@ -86,7 +86,7 @@ describe('client', function () {
     // Create new client with a session to simulate creating session with a stored cookie
     let session = new Session()
     session.set(cookie)
-    client = new Client(testUtils.getServer1URL(), session)
+    client = new Client(testUtils.getServer1URL())
 
     // Wait for connection and make sure there was no error
     sinon.spy(client, '_connect')
@@ -99,6 +99,7 @@ describe('client', function () {
     let session = new Session()
     session.set('invalid-cookie')
     client = new Client(testUtils.getServer1URL(), session)
+    client._backoff.startingRetryAfterMSecs = 1 // Allow tests to complete
 
     // Wait for connection and make sure there was an error
     let err = await sporks.once(client, 'error')
