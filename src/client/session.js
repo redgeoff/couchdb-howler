@@ -9,7 +9,11 @@ class Session {
 
   // We use the async keyword to allow for swapping out the session store with an async store
   async set (id) {
-    this._cookie.set(this._name, id)
+    // We must set an expiration if we want the cookie to persist across app restarts. As per
+    // https://stackoverflow.com/a/8713316/2831606 on iOS, cookies without an expiration are
+    // considered session cookies and cleared when the app is restarted. The cookies will expire
+    // after 30 days. TODO: make this value configurable via Client.
+    this._cookie.set(this._name, id, { expires: 30 })
   }
 
   // We use the async keyword to allow for swapping out the session store with an async store
