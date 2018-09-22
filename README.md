@@ -32,7 +32,6 @@ You can use Docker Swarm to run a cluster of howler servers. For example, you ca
 ```
 $ docker network create \
     --driver overlay \
-    --subnet 10.0.9.0/24 \
     --opt encrypted \
     howler-network
 ```
