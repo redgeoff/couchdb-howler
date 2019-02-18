@@ -65,7 +65,7 @@
     "eslint-plugin-standard": "^4.0.0",
     "gofur": "^1.1.1",
     "istanbul": "^0.4.5",
-    "mocha": "^5.2.0",
+    "mocha": "^6.0.0",
     "nyc": "^13.2.0",
     "prettier-eslint-cli": "^4.7.1",
     "sinon": "^7.2.4",
