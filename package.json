@@ -46,7 +46,7 @@
     "socket.io": "^2.2.0",
     "socket.io-client": "^2.2.0",
     "sporks": "^1.0.1",
-    "yargs": "^15.0.1"
+    "yargs": "^15.3.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
