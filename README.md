@@ -60,7 +60,7 @@ $ docker service create \
   --detach=true \
   --replicas 2 \
   --network=howler-network \
-  --label traefik.frontend.rule="Host:howler.exmaple.com" \
+  --label traefik.frontend.rule="Host:howler.example.com" \
   --label traefik.port=80 \
   --label traefik.backend.loadbalancer.sticky=true \
   -e --couchdb_url='https://admin:secret@example.com' \
