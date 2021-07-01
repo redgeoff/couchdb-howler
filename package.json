@@ -68,7 +68,7 @@
     "mocha": "^6.0.0",
     "nyc": "^15.0.0",
     "prettier-eslint-cli": "^5.0.0",
-    "sinon": "^8.0.0",
+    "sinon": "^9.0.0",
     "wait-on": "^4.0.0"
   },
   "greenkeeper": {
